@@ -1,12 +1,41 @@
 \chapter{Einleitung}
-\label{cha:einleitung}
 
 \section{Hintergrund und Motivation}
-\label{sec:motivation}
+
+\subsection{Umstellung von Softwaresystemen}
+Viele Unternehmen stehen vor der Entscheidung, größere Softwaresysteme auf neue Technologien umzustellen. Dies erfordert jedoch häufig einen enormen Entwicklungsaufwand und somit oft mehr Aufwand, als die verfügbaren Ressourcen zulassen, da neben der Umstellung meist noch neue Produkte entwickelt werden. Neben KI, speziellen Tools und anderen technischen Möglichkeiten, Code wiederzuverwenden oder auf eine andere Technologie zu migrieren, ist eine vorerst einfache Möglichkeit für die Entwicklung, Features wegzulassen.
+
+\subsection{Entscheidung für Features}
+Die Basis für faktenbasierte Entscheidungen bilden hierbei Verhaltensdaten aus der bestehenden Anwendung. Derartige Daten müssen daher vor solchen Umstellungen mit Tracking-Technologien ermittelt und ausgewertet werden. Im Web gibt es bereits verschiedene Möglichkeiten, gezielt solche Daten zu sammeln und auf einer Weboberfläche darzustellen. Vergleichbare Möglichkeiten existieren im Bereich von Desktopanwendungen, die auf den UI-Frameworks WPF und Windows Forms basieren, nicht.
+
+\subsection{Technologieänderung Richtung Web}
+Aktuelle Trends zeigen, dass sich die Entwicklung Richtung Web verlagert und Desktopanwendungen dadurch an Relevanz verlieren. Daher sind gerade für nicht-webbasierte Technologien Daten über die Nutzung der Software wichtig. Unternehmen wie RZL Software benötigen daher Lösungen, die es ihnen ermöglichen, Nutzungsdaten in WPF- und Windows-Forms-Applikationen zu sammeln – und das auf eine möglichst einfache und flexible Art und Weise.
 
 \section{Ziele der Arbeit}
-\label{sec:goal}
+
+\subsection{Datenermittlung}
+Das Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann. Die Anforderungen an dieses System sind die Ermittlung, Filterung und Extraktion von Nutzerdaten. Darauf aufbauend müssen die ermittelten Daten pseudonymisiert und strukturiert an ein bestehendes System übermittelt werden können.
+
+\subsection{Konfigurierbar}
+Aus Entwicklungssicht muss eine gezielte Steuerung und Auswahl der zu sendenden Daten einfach und ohne Anpassung des bestehenden Codes möglich sein. Somit muss eine einmalige Integration in das bestehende System genügen, wobei sich das Framework flexibel durch Konfiguration an das Basissystem anpassen können muss.
+
+\subsection{Fragen zur Beantwortung}
+\label{subsec:initial_questions}
+Von besonderer Relevanz ist, dass die vom System erfassten Informationen die Auszuwertenden dabei unterstützen, folgende Fragen zu beantworten:
+
+\begin{itemize}
+    \item Wie oft wird eine Ansicht in der Anwendung geöffnet?
+    \item Wie oft wird eine bestimmte Anwendungsmöglichkeit verwendet?
+    \item Welche Shortcuts werden in einer Ansicht verwendet?
+    \item Wie hoch ist die Anzahl von bestimmten Datensätzen?
+    \item Wie beeinflussen Versionsänderung das Laufzeitverhalten?
+    \item Welche Aktionen treten in einer Ansicht auf?
+    \item Gibt es eine bestimmte Abfolge von Aktionen im System?
+    \item Wie interagieren Nutzer mit einer Ansicht?
+\end{itemize}
+
+\subsection{Anwendung des Systems}
+Um zu zeigen, dass dieses System die entsprechenden Anforderungen erfüllt, soll diese Arbeit diese Fragen aus Abschnitt \ref{subsec:initial_questions} auf Basis einer Ansicht aus einem bestehenden System beantworten. Somit soll an einem Praxisbeispiel die Verwendung des Frameworks verdeutlicht werden.
 
 \section{Vorgehensweise}
-\label{sec:doing}
 
