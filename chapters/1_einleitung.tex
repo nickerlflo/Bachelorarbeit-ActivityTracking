@@ -1,4 +1,6 @@
 \chapter{Einleitung}
+Dieses Kapitel gibt eine Übersicht über die Motivation und die Ziele dieser Arbeit. 
+Des Weiteren wird eine Übersicht über das Vorgehen zur Erreichung des Ziels gegeben.
 
 \section{Hintergrund und Motivation}
 
@@ -6,7 +8,7 @@
 Viele Unternehmen stehen vor der Entscheidung, größere Softwaresysteme auf neue Technologien umzustellen. Dies erfordert jedoch häufig einen enormen Entwicklungsaufwand und somit oft mehr Aufwand, als die verfügbaren Ressourcen zulassen, da neben der Umstellung meist noch neue Produkte entwickelt werden. Neben KI, speziellen Tools und anderen technischen Möglichkeiten, Code wiederzuverwenden oder auf eine andere Technologie zu migrieren, ist eine vorerst einfache Möglichkeit Features wegzulassen.
 
 \subsection{Entscheidung für Features}
-Die Basis für faktenbasierte Entscheidungen bilden hierbei Verhaltensdaten aus der bestehenden Anwendung. Derartige Daten müssen daher vor solchen Umstellungen mit Tracking-Technologien ermittelt und ausgewertet werden. Im Web gibt es bereits verschiedene Möglichkeiten, gezielt solche Daten zu sammeln und auf einer Weboberfläche darzustellen. Vergleichbare Möglichkeiten existieren im Bereich von Desktopanwendungen, die auf den UI-Frameworks WPF und Windows Forms basieren, nicht.
+Die Basis für faktenbasierte Entscheidungen bilden hierbei Verhaltensdaten aus der bestehenden Anwendung. Derartige Daten müssen daher vor solchen Umstellungen mit Tracking-Technologien ermittelt und ausgewertet werden. Im Web gibt es bereits verschiedene Möglichkeiten, gezielt solche Daten zu sammeln und auf einer Weboberfläche darzustellen. Vergleichbare Möglichkeiten existieren im Bereich von Desktopanwendungen, die auf den UI-Frameworks WPF und Windows Forms basieren, nicht. Die Auswertung mit den bestehenden Systemen ist zwar oft unabhängig von der Technologie möglich, jedoch fehlt das Gegenstück zur Sammlung der Daten aus Desktopanwendungen.
 
 \subsection{Technologieänderung Richtung Web}
 Aktuelle Trends zeigen, dass sich die Entwicklung Richtung Web verlagert und Desktopanwendungen dadurch an Relevanz verlieren. Daher sind gerade für nicht-webbasierte Technologien Daten über die Nutzung der Software wichtig. Unternehmen wie RZL Software benötigen daher Lösungen, die es ihnen ermöglichen, Nutzungsdaten in WPF- und Windows-Forms-Applikationen zu sammeln und das auf eine möglichst einfache und flexible Art und Weise.
@@ -14,7 +16,7 @@ Aktuelle Trends zeigen, dass sich die Entwicklung Richtung Web verlagert und Des
 \section{Ziele der Arbeit}
 
 \subsection{Datenermittlung}
-Das Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann. Die Anforderungen an dieses System sind die Ermittlung, Filterung und Extraktion von Nutzungsdaten. Darauf aufbauend müssen die ermittelten Daten pseudonymisiert und strukturiert an ein bestehendes System übermittelt werden können.
+Das Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann. Die Anforderungen an dieses System sind die Ermittlung, Filterung und Extraktion von Nutzungsdaten. Darauf aufbauend müssen die ermittelten Daten pseudonymisiert und strukturiert an ein bestehendes System übermittelt werden können. Daher liegt der Fokus der Arbeit auf der Datenermittlung und nicht der Auswertung oder Darstellung der Daten.
 
 \subsection{Konfigurierbar}
 Aus Entwicklungssicht muss eine gezielte Steuerung und Auswahl der zu sendenden Daten einfach und ohne Anpassung des bestehenden Codes möglich sein. Somit entsteht die Voraussetzung einer einmalige und einzigen Integration in das bestehende System, wobei sich das Framework flexibel durch Konfiguration an das Basissystem anpassen muss.
