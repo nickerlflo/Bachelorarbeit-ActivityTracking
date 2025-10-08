@@ -65,7 +65,7 @@ Der dargestellte Ablauf bezieht sich auf Universal Analytics. Sowohl die Funktio
 
 \subsection{OpenTelemetry}
 \label{subsec:open_telemetry}
-Zur Erfassung von Metriken, Logs und Traces in Anwendungen und somit zur Erreichung einer besseren Observability bietet sich \cite[OpenTelemetry]{opentelemetry_what_is} an. OpenTelemetry ist ein Open-Source-Projekt, das eine einheitliche Erfassung, Verarbeitung und Weiterleitung von Telemetriedaten unabhängig vom jeweiligen Anbieter ermöglicht. Dafür stellt OpenTelemetry eine umfangreiche Sammlung von SDKs für verschiedene Programmiersprachen bereit. Auf diese Weise können selbst Anwendungen, die aus unterschiedlichen Technologien bestehen, ganzheitlich instrumentiert und überwacht werden.
+Zur Erfassung von Metriken, Logs und Traces in Anwendungen und somit zur Erreichung einer besseren Observability bietet sich OpenTelemetry \cite{opentelemetry_what_is} an. OpenTelemetry ist ein Open-Source-Projekt, das eine einheitliche Erfassung, Verarbeitung und Weiterleitung von Telemetriedaten unabhängig vom jeweiligen Anbieter ermöglicht. Dafür stellt OpenTelemetry eine umfangreiche Sammlung von SDKs für verschiedene Programmiersprachen bereit. Auf diese Weise können selbst Anwendungen, die aus unterschiedlichen Technologien bestehen, ganzheitlich instrumentiert und überwacht werden.
 
 \subsubsection{Aufbau von OpenTelemetry}
 OpenTelemetry besteht im Wesentlichen aus drei Komponenten: der Auto-Instrumentierung, der SDK-basierten manuellen Instrumentierung sowie dem sogenannten Collector.  
@@ -90,14 +90,56 @@ Für Web-Technologien, Datenbankzugriffe oder HTTP-Kommunikation existiert berei
 \section{Mögliche Ansätze für Aktivitäts-Tracking}
 \label{sec:solutions_tracking}
 
-\subsection{Proxy Server}
+Für Aktivitäts-Tracking existieren zahlreiche Ansätze, von denen einige in den Abschnitten zu Google Analytics (vgl. Abbildung \ref{fig:googel_analytics_architecture}) und OpenTelemetry \ref{subsec:open_telemetry} Anwendung finden. Die meisten dieser Konzepte sind allgemein anwendbar, wobei es – wie im Abschnitt \ref{subsec:proxy_server} beschrieben – auch Lösungen gibt, die beispielsweise aufgrund ihrer Topologie nur auf Webtechnologien übertragbar sind. Dennoch liefern alle diese Konzepte wertvolle Hinweise, wie eine möglichst klare Trennung zwischen Tracking-Code und bestehender Anwendungslogik realisiert werden kann.
+
+\subsection{Proxy-Server}
+
+\subsubsection{Funktionsweise}
 \label{subsec:proxy_server}
+In einem Artikel \cite{atterer2006knowing} wird beschrieben, wie mithilfe eines Proxy-Servers das Nutzerverhalten auf einer Webseite unabhängig von Browser- und Servertechnologie ermittelt werden kann. Der Zusammenhang zwischen Client, Server und Proxy wird in Abbildung \ref{fig:proxy_server_concept} dargestellt.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{2_Proxy_Server_Konzept}
+\caption{HTTP-Proxy zur Ermittlung von Nutzerverhalten. Quelle: \cite{atterer2006knowing}}
+\label{fig:proxy_server_concept}
+\end{figure}
+
+Der Proxy hat die Aufgabe, den HTTP-Content bzw. die HTML-Seite so zu bearbeiten, dass beispielsweise mittels JavaScript Verhaltensdaten im Client gesammelt und an den Proxy übermittelt werden. Die Bearbeitung des HTML erfolgt durch das Injizieren eines Skript-Tags in die Datei. Diese Daten werden anschließend vom Proxy in ein Logfile geschrieben, das zur Auswertung des Nutzerverhaltens dient. Eine Anpassung des Tracking-Codes erfordert somit keine Änderung des Produktivcodes, wodurch Flexibilität gewonnen wird. Wie im Abschnitt \ref{sec:solutions_tracking} erläutert, bleiben der Tracking-Code und die eigentliche Anwendungslogik voneinander getrennt. Dies hat zur Folge, dass der Code wartbar und verständlich bleibt.
+
+\subsubsection{Funktionsweise des injizierten Skripts}
+Das injizierte JavaScript bietet im Client die Möglichkeit, mittels DOM Events \cite{mdn2025_domevents} Mausbewegungen und Tastatureingaben – und damit die Interaktion mit der Webseite – zu erfassen. Die Registrierung auf Events hat dabei keine Auswirkungen auf den bestehenden JavaScript-Code, sofern keine Fehler im injizierten Skript vorhanden sind.
+
+\subsubsection{Weitere Informationsgewinnung}
+Unabhängig vom injizierten JavaScript-Code kann der Proxy auch die für einen Serverlog typischen Informationen (z.B. IP-Adresse, Gerätetyp usw.) erfassen. Da der Proxy zwischen Server und Client liegt, erscheint es für den Anwender so, als würde dieser direkt mit dem Server interagieren.
+
+\subsubsection{Anwendbarkeit des Proxy-Ansatzes}
+Das Proxy-System funktioniert aufgrund des Abhörens des gesamten HTTP-Verkehrs und des Einfügens von JavaScript sowohl für Single-Page- als auch für klassische Multi-Page-Applikationen.
 
 \subsection{Externes JavaScript}
 \label{subsec:external_js}
 
+\subsubsection{Allgemein}
+Ähnlich wie bei der in Abschnitt \ref{subsec:proxy_server} beschriebenen Proxy-Variante wird auch hier JavaScript eingesetzt. Im Gegensatz dazu erfolgt die Kommunikation jedoch nicht über einen Proxy, sondern über einen externen Server (siehe Abbildung \ref{fig:external_javascript}), wie dies beispielsweise bei Google Analytics \cite{weber2015practical} der Fall ist. Das Skript-Tag wird dabei direkt in jede Seite eingebettet, und das Skript wird vom Client vom Tracking-Server heruntergeladen. Anschließend sendet der Client die erfassten Daten über einen HTTP-Request direkt an den Tracking-Server.  
+Die Informationen, die in der Proxy-Variante (\ref{subsec:proxy_server}) durch den Proxy ermittelt werden, können nun vom Browser selbst über asynchrone HTTP-Anfragen übertragen werden.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{2_Externes_Javascript}
+\caption{Ablauf einer Standardinteraktion beim Tracking mit externem Skript.}
+\label{fig:external_javascript}
+\end{figure}
+
+\subsubsection{Konfigurierbarkeit}
+Die zu erfassenden Daten können von einem Konfigurationsserver, wie in Abbildung \ref{fig:external_javascript} veranschaulicht, abgefragt werden. Je nach übermittelter Konfiguration verhält sich das eingebundene Skript unterschiedlich, sodass die zu sammelnden Daten in Echtzeit und in gewünschter Form angepasst werden können. In Google Analytics \ref{subsec:google_analytics} wird diese Flexibilität beispielsweise durch den Tag Manager ermöglicht.
+
+\subsubsection{Trennung von Aufgabenbereichen}
+Da das Skript nun fest im Anwendungscode referenziert wird, kann es zusätzlich für benutzerdefinierte Aktionen innerhalb der Anwendung verwendet werden. Dadurch lassen sich sehr spezifische, auf den jeweiligen Anwendungsfall zugeschnittene Abfragen umsetzen. Grundsätzlich bleibt dabei eine Trennung zwischen Anwendungscode und Tracking-Code bestehen, solange kein benutzerdefiniertes Tracking implementiert wird.  
+Das in Abschnitt \ref{subsec:proxy_server} beschriebene Proxy-Server-Konzept gilt hingegen als weniger transparent für Entwicklerinnen und Entwickler, während die feste Referenzierung des externen Scripts hier klare Anhaltspunkte für Verwendung und Zugriff bietet.
+
 \subsection{Automatisch generierter Code}
 \label{subsec:autogenerated_code}
+
 
 \subsection{Aufgabendelegation}
 \label{subsec:task_delegation}
