@@ -182,11 +182,57 @@ Die Schnittstelle der dekorierten Klasse bleibt dabei identisch, und nach Ausfü
 \label{fig:decorator_pattern}
 \end{figure}
 
-\section{Softwaremuster für UI Frameworks}
+\section{Softwaremuster für UI-Frameworks}
 \label{subsec:patterns}
+
+Das im Zuge dieser Arbeit entwickelte Tracking-Framework soll in eine Windows Forms- (\ref{subsec:Winforms}) und eine WPF-Anwendung (\ref{subsec:WPF}) integriert werden. 
+Für die Integration ist es daher wichtig zu verstehen, wie diese Anwendungen grundsätzlich aufgebaut sind. 
+In diesem Abschnitt werden daher die Patterns \textit{MVVM} (\ref{subsec:mvvm}) und \textit{MVP} (\ref{subsec:mvp}) erläutert.
 
 \subsection{MVVM}
 \label{subsec:mvvm}
+
+Das \textit{Model-View-ViewModel} (MVVM) Pattern stammt von Microsoft \cite{Gossman2005MVVM} und wurde im Zuge der Entwicklung von WPF vorgestellt. 
+Das \textit{Model-View-Controller} (MVC) Pattern \cite{Krasner1988MVC} bildet dabei die Grundlage, wobei die Aufgabe des Models in beiden Patterns gleich bleibt. 
+Der Zusammenhang zwischen den einzelnen Komponenten wird in Abbildung~\ref{fig:mvvm_pattern} dargestellt.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{2_MVVM_Pattern}
+    \caption{Struktur des MVVM-Patterns. Quelle: \cite{Uncopy2024MVVMPattern}}
+    \label{fig:mvvm_pattern}
+\end{figure}
+
+\subsubsection{View}
+\label{subsubsec:view_for_mvvm}
+Die View stellt gemeinsam mit dem ViewMode \ref{subsubsec:viewmodel} den Präsentations-Layer dar. 
+Der Code für die View wird häufig durch sogenannte Designer\footnote{Programme, die eine Benutzeroberfläche bereitstellen, mit deren Hilfe UI-Elemente platziert und der Stil festgelegt werden kann. 
+Diese Tools ermöglichen es Designern, auch ohne Programmierkenntnisse eine Benutzeroberfläche zu erstellen.} erzeugt und in einem XML-basierten Format wie z.\,B. XAML (in WPF) gespeichert. 
+
+Die View enthält ausschließlich visuelle Elemente sowie die Logik, die für die Anzeige erforderlich ist (z.\,B. Animationen). 
+Views, die Daten anzeigen, werden – wie in Abbildung~\ref{fig:mvvm_pattern} gezeigt – über ein DataBinding (\ref{subsubsec:databinding}) mit den benötigten Informationen versorgt. 
+Dazu hält die View eine Referenz auf das ViewModel (\ref{subsubsec:viewmodel}), um das Binding herzustellen.
+
+\subsubsection{Model}
+\label{subsubsec:model_for_mvvm}
+Die Business-Logik bzw. Domain-Logik enthält das Datenmodell, das unabhängig von der View und dem ViewModel verwendet werden kann. 
+Daher besteht eine strikte Trennung zwischen Präsentationsschicht und Model. 
+Dies ermöglicht die Wiederverwendung des Models in verschiedenen Anwendungen, ohne dass Änderungen an der Darstellung Anpassungen im Model erfordern. 
+Zum Model zählen in der Regel Service-Methoden, Repositories und Entitäten. 
+Das ViewModel (\ref{subsubsec:viewmodel}) bezieht, wie in Abbildung~\ref{fig:mvvm_pattern} dargestellt, seine Daten aus diesem Model.
+
+\subsubsection{ViewModel}
+\label{subsubsec:viewmodel}
+Das ViewModel fungiert als Adapter zwischen View (\ref{subsubsec:view_for_mvvm}) und Model (\ref{subsubsec:model_for_mvvm}). 
+In einfachen Fällen könnte die View direkt an das Model binden, was jedoch in komplexeren Szenarien dazu führen würde, dass das Model an die View angepasst werden müsste. Das ViewModel bereitet die Daten so auf, dass sie über das DataBinding (\ref{subsubsec:databinding}) der View bereitgestellt werden können. 
+Ein weiterer Grund für die Einführung des ViewModels liegt darin, die für das Binding notwendige Logik aus der Domain-Logik herauszulösen, um diese sauber zu halten.
+
+\newpage
+
+\subsubsection{DataBinding}
+\label{subsubsec:databinding}
+Das DataBinding (siehe Abbildung~\ref{fig:mvvm_pattern}) ist der Datenkanal, über den Informationen zwischen zwei Komponenten in beide Richtungen ausgetauscht werden können. 
+Beide Seiten werden über Datenänderungen informiert und synchronisieren sich je nach Art des Bindings automatisch.
 
 \subsection{MVP}
 \label{subsec:mvp}
