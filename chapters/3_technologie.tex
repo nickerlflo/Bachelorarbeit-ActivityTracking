@@ -65,6 +65,58 @@ Reflection ist ein sehr mächtiges Werkzeug, bringt jedoch Leistungseinbußen mi
 
 \subsection{Asynchrone Programmierung}
 \label{subsec:async}
+Für trackingbasierte Prozesse ist es wichtig, dass diese die Usability des bestehenden Systems nicht beeinträchtigen. Würden Tracking-Abläufe synchron mit der Benutzeroberfläche ausgeführt werden, könnte die UI währenddessen nicht auf Benutzereingaben reagieren. Daher spielt die asynchrone Programmierung eine entscheidende Rolle in dieser Arbeit.
+
+\subsection{Grundlegende Funktionsweise}
+Um Aufgaben nebenläufig ausführen zu können, bietet .NET (Abschnitt \ref{sec:dotnet}) die Möglichkeit, Threads zu verwenden. Threads sind leichtgewichtige Prozesse, die denselben Heap teilen, jedoch jeweils über einen eigenen Stack verfügen. Sie sind, abhängig vom Betriebssystem, ein grundlegender Bestandteil des Systems. Threads können zur Laufzeit erzeugt werden und führen dann Methoden wie im Programm \ref{prog:thread_based_programming} gezeigt aus. Nach Abschluss der Methode beendet sich der Thread und die Ressourcen werden vom Betriebssystem freigegeben. Threads sind ein zentraler Bestandteil von .NET und werden in einem Artikel von Microsoft \cite{Microsoft_ThreadsAndThreading} näher beschrieben.
+
+\begin{program}[H]
+\begin{CsCode}
+Thread workerThread = new Thread(() => Console.WriteLine("Arbeit beendet"));
+
+Console.WriteLine("Starte Arbeit");
+workerThread.Start();
+\end{CsCode}
+\caption{Erzeugen eines Threads}
+\label{prog:thread_based_programming}
+\end{program}
+
+Da das Erzeugen von Threads Systemressourcen kostet, stellt C\# (Unterabschnitt \ref{subsec:csharp}) die ThreadPool-Klasse bereit. Diese erzeugt eine feste Anzahl an Threads, die wiederverwendet werden. Aufgaben werden als Arbeitspakete an diese Threads delegiert. Alle in C\# vorgestellten Konzepte der asynchronen Programmierung nutzen diesen Pool standardmäßig.
+
+\subsubsection{Konzepte der asynchronen Programmierung in C\#}
+In C\# (siehe Unterabschnitt \ref{subsec:csharp}) existieren mehrere Konzepte, um Abläufe verzahnt (auf einem einzelnen Kern) oder parallel (auf mehreren Kernen) auszuführen, wie im Buch \cite{sarcar2004design} beschrieben. Zu diesen Konzepten zählen:
+
+\begin{itemize}
+    \item Asynchronous Programming Model: Umsetzung über Delegate.BeginInvoke und Delegate.EndInvoke.
+    \item Event-based Asynchronous Pattern: Ein Thread führt eine Aufgabe aus und informiert einen Observer über deren Abschluss.
+    \item Task-based Asynchronous Pattern: Ein Task ist eine Einheit, die eine bestimmte Aufgabe ausführt und Informationen über deren Status enthält.
+\end{itemize}
+
+In dieser Arbeit wird das Task-based Asynchronous Pattern verwendet, da es die Nutzung von async und await ermöglicht.
+
+\subsubsection{Task-based Asynchronous Pattern}
+Ein Task \cite{Microsoft_TaskClass} repräsentiert eine definierte Aufgabe. Diese wird standardmäßig auf einem Thread aus dem ThreadPool ausgeführt. Ein Task ermöglicht es, auf seine Fertigstellung zu warten oder nach Abschluss eine Fortsetzung auszuführen. Diese Fortsetzung kann im gleichen Synchronization Context oder in einem anderen Kontext erfolgen, um Deadlocks zu vermeiden. Ein Deadlock kann beispielsweise auftreten, wenn auf einen Task blockierend in einem Thread gewartet wird, der jedoch für die Fortsetzung des Tasks erforderlich ist. Ein Beispiel für asynchronen Code wird in Programm \ref{prog:aync_task_based} gezeigt.
+
+\begin{program}[H]
+\begin{CsCode}
+Console.WriteLine("Arbeit starten");
+
+Task resultTask = Task.Run(async () =>
+{
+    for (int i = 0; i < 100; i++)
+        await Task.Delay(100);
+
+    Console.WriteLine("Arbeit fertiggestellt");
+});
+
+Console.WriteLine("Ohne Arbeit fortsetzen");
+
+await resultTask; // alternativ: .Wait() für synchrones Warten
+Console.WriteLine("Arbeit sicher fertig");
+\end{CsCode}
+\caption{Asynchrone Programmierung mit Tasks}
+\label{prog:aync_task_based}
+\end{program}
 
 \section{UI Frameworks}
 \label{sec:ui_frameworks}
