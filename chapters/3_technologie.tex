@@ -1,6 +1,6 @@
 \chapter{Technologien und Werkzeuge}
 \label{cha:technologie_werkzeuge}
-Die verwendeten Technologien und Werkzeuge sind für diese Arbeit wesentlich, um die Implementierung nachvollziehen zu können. Die Entwicklungsplattform .NET spielt dabei für das entwickelte Framework eine entscheidende Rolle, wie bereits in Unterabschnitt \ref{subsec:patterns} bei den beschriebenen Patterns erwähnt. In diesem Kapitel werden daher einige zentrale Konzepte vorgestellt. Der Schwerpunkt liegt insbesondere auf der Behandlung der verwendeten UI-Frameworks der .NET-Plattform.
+Die verwendeten Technologien und Werkzeuge sind für diese Arbeit wesentlich, um die Implementierung nachvollziehen zu können. Die Entwicklungsplattform .NET spielt dabei für das entwickelte Framework eine entscheidende Rolle, wie bereits in Unterabschnitt \ref{subsec:patterns} bei den beschriebenen Patterns erwähnt. In diesem Kapitel werden daher einige zentrale Konzepte vorgestellt.
 
 \section{Visual Studio}
 \label{sec:visual_studio}
@@ -118,11 +118,24 @@ Console.WriteLine("Arbeit sicher fertig");
 \label{prog:aync_task_based}
 \end{program}
 
-\section{UI Frameworks}
+\section{UI-Frameworks}
 \label{sec:ui_frameworks}
+In diesem Abschnitt werden die UI-Frameworks aus der .NET-Umgebung (siehe Abschnitt \ref{sec:dotnet}) vorgestellt, in die das Aktivitäts-Tracking-Framework integriert werden kann. Für diese Frameworks ist insbesondere das Event-System von Bedeutung, da es ein Tracking durch die Verfolgung von Benutzeraktionen, wie z.B. Button-Klicks, ermöglicht.
 
 \subsection{WPF}
 \label{subsec:WPF}
+Windows Presentation Foundation \cite{microsoft_wpf_overview} ist ein Framework zur Entwicklung von Windows-Desktop-Applikationen. Es baut auf dem in Abschnitt \ref{fig:mvvm_pattern} erläuterten MVVM-Pattern auf und verwendet für das Erstellen der Ansichten XAML, einen XML-Dialekt. 
+
+Um die UI-Elemente anzusteuern, gibt es eine Code-Behind-Datei, welche eine Partial-Klasse zu der aus dem XAML generierten Klasse darstellt. Dort können Events behandelt oder anderer view-spezifischer Code ausgeführt werden. Dies wird im Buch \cite{james2015pro} näher erläutert und an Beispielen dargestellt.
+
+\subsubsection{Event-System WPF}
+Events stellen die Basis für den Zugriff auf das Verhalten in einer Ansicht dar. WPF bietet hierzu \emph{Routed Events} \cite{microsoft_wpf_routed_events_overview} an. Routed Events sind Events, die im Elementbaum wandern können und die entsprechenden registrierten Handler im Baum informieren. WPF bietet hierfür folgende drei Modelle für das Wandern durch den Baum an:
+
+\begin{itemize}
+    \item \textbf{Bubbling}: Das Event wandert von der Source zum Wurzelelement (Window)
+    \item \textbf{Tunneling}: Das Event wandert von der Wurzel zur Source
+    \item \textbf{Direct}: Nur Handler auf der Source werden über das Ereignis informiert
+\end{itemize}
 
 \subsection{Windows Forms}
 \label{subsec:Winforms}
