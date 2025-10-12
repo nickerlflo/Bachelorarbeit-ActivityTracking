@@ -4,7 +4,10 @@ Die verwendeten Technologien und Werkzeuge sind für diese Arbeit wesentlich, um
 
 \section{Visual Studio}
 \label{sec:visual_studio}
-Für C\# {Unterabschnitt \ref{subsec:csharp}} gibt es mehere Entwicklungsumgebung wie z.B. Ride und VisualStudio. Da der in dieser Arbeit erstellte Arbeit in eimen Produktiv Umfeld eingesetzt werden soll, in wlechen VisualStudio verwedet wird, wurde auch in dieser Arbeit Visual Studio für die Enwiclung eingesetzt. VisualStd
+
+Für C\# (Unterabschnitt \ref{subsec:csharp}) existieren mehrere Entwicklungsumgebungen, wie zum Beispiel JetBrains Rider oder Visual Studio. Da die in dieser Arbeit erstellte Software in einem produktiven Umfeld eingesetzt werden soll, in dem Visual Studio verwendet wird, wurde für die Entwicklung ebenfalls Visual Studio 2022 eingesetzt. 
+
+Visual Studio ist eine komplexe Integrated Development Environment (IDE) von Microsoft und beinhaltet Funktionalitäten zum Erstellen, Debuggen, Testen und weitere nützliche Features, wie in der offiziellen Dokumentation beschrieben \cite{MicrosoftVisualStudioIDE2022}.
 
 \section{.NET}
 \label{sec:dotnet}
@@ -29,6 +32,13 @@ Die Erzeugnisse des Kompilierungsprozesses werden in .NET als Assemblies \cite{m
 \subsubsection{Erzeugung von Assemblies}
 Abbildung \ref{fig:assemblies_dotnet} zeigt, wie eine Assembly aus mehreren Quelldateien erzeugt wird. Dabei wird das MSBuild-File verwendet, um dem Compiler die erforderlichen Schritte mitzuteilen. Der Compiler erzeugt anschließend aus den Ressourcen und den C\#-Dateien (siehe Unterabschnitt \ref{subsec:csharp}) eine Assembly. Dabei werden die Ressourcen, Metadaten und der IL-Code in die resultierende Datei eingebettet.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{2_Assemblies_Dotnet}
+    \caption{Assemblies Aufbau und Generierung}
+    \label{fig:assemblies_dotnet}
+\end{figure}
+
 \subsubsection{Aufbau einer Assembly}
 Eine Assembly besteht, wie in Abbildung \ref{fig:assemblies_dotnet} dargestellt, aus mehreren Modulen. Diese sogenannten Module enthalten IL-Code und Metadaten, wobei das Hauptmodul zusätzlich ein Manifest beinhaltet.  
 Der IL-Code (Intermediate Language) stellt eine Zwischensprache zwischen Maschinencode und der Programmiersprache dar und enthält die Anweisungen, die letztlich ausgeführt werden.  
@@ -43,13 +53,6 @@ Die Metadaten enthalten Informationen über Methodensignaturen, Typen und weiter
 \end{itemize}
 
 Da Assemblies im PE-Format (Portable Executable) \cite{MicrosoftLearn_PEFormat} gespeichert werden, enthalten sie zusätzlich alle für dieses Format erforderlichen Informationen.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{2_Assemblies_Dotnet}
-    \caption{Assemblies Aufbau und Generierung}
-    \label{fig:assemblies_dotnet}
-\end{figure}
 
 \subsection{Reflection}
 \label{subsec:reflection}
