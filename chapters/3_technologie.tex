@@ -153,6 +153,9 @@ Windows Forms \cite{microsoft_winforms_overview} ist die Vorgängertechnologie v
 \subsubsection{Event-System}
 Events in Windows Forms \cite{microsoft_winforms_events_overview} sind grundsätzlich nicht routed, sondern werden nur von den am jeweiligen Steuerelement registrierten Event-Handlern verarbeitet. Es gibt jedoch Ausnahmen bei Steuerelementen, die keinen eigenen Fenster-Handle besitzen und daher keine Events direkt empfangen können. In diesen Fällen übernimmt das übergeordnete Steuerelement (Parent) die Ereignisverarbeitung und leitet das Event gegebenenfalls weiter. Solche Events können somit sowohl vom Parent- als auch vom Child-Element behandelt werden. Das Verhalten hängt dabei häufig von Einstellungen wie KeyPreview \cite{microsoft_form_keypreview} ab und muss entsprechend berücksichtigt werden.
 
+Die bereitgestellten Events unterscheiden sich je nach Steuerelement. Abhängig vom Anwendungsfall müssen für die einzelnen Steuerelemente unterschiedliche Handler registriert werden. Die Lifecycle-Events bleiben jedoch weitestgehend gleich.
+
+
 
 
 
