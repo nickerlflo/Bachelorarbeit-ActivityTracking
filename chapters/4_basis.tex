@@ -46,11 +46,11 @@ Da es in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) viele unters
 
 \section{Visual Tree Helper}
 \label{sec:visual_tree_helper}
-Sowohl in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) als auch in WPF (siehe Unterabschnitt \ref{subsec:WPF}) wird ein Baum aus visuellen Elementen nach dem Prinzip des Composition Pattern aufgebaut (siehe \cite{gamma1995design}).
+Sowohl in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) als auch in WPF (siehe Unterabschnitt \ref{subsec:WPF}) wird ein Baum aus visuellen Elementen nach dem Prinzip des Composition Pattern aufgebaut (siehe Pattern GoF \cite{gamma1995design}).
 
 Gerade für die Registrierung von Events ist das Auffinden bestimmter Controls in diesem Baum entscheidend. Daher gibt es sowohl für WPF als auch für Windows Forms einen Visual Tree Helper, der Elemente rekursiv im Baum findet.
 
-Eine klare Unterscheidung zwischen dem logischen und dem visuellen Baum ist wesentlich und wird in Abbildung \ref{fig:logical_visual_tree} veranschaulicht. Während der visuelle Baum ausschließlich die tatsächlich sichtbaren Elemente einer Benutzeroberfläche umfasst, beschreibt der logische Baum die hierarchische Struktur der Ansicht, einschließlich jener Objekte, die beispielsweise als Container, Templates oder Datenprovider für sichtbare Elemente dienen.
+Eine klare Unterscheidung zwischen dem logischen und dem visuellen Baum ist in WPF \cite{microsoft_trees_in_wpf} wesentlich und wird in Abbildung \ref{fig:logical_visual_tree} veranschaulicht. Während der visuelle Baum ausschließlich die tatsächlich sichtbaren Elemente einer Benutzeroberfläche umfasst, beschreibt der logische Baum die hierarchische Struktur der Ansicht, einschließlich jener Objekte, die beispielsweise als Container, Templates oder Datenprovider für sichtbare Elemente dienen.
 
 \begin{figure}[H]
     \centering
