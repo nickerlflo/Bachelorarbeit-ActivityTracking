@@ -45,11 +45,24 @@ Um auf Events von Controls zugreifen zu können, wird der UI Accessor verwendet.
 Da es in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) viele unterschiedliche Events mit gleicher Bedeutung gibt, spielt diese Abstraktion eine wichtige Rolle. Darüber hinaus können auch benutzerdefinierte UserControls mit eigenen Events zentral berücksichtigt werden.
 
 \section{Visual Tree Helper}
+\label{sec:visual_tree_helper}
 Sowohl in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) als auch in WPF (siehe Unterabschnitt \ref{subsec:WPF}) wird ein Baum aus visuellen Elementen nach dem Prinzip des Composition Pattern aufgebaut (siehe \cite{gamma1995design}).
 
 Gerade für die Registrierung von Events ist das Auffinden bestimmter Controls in diesem Baum entscheidend. Daher gibt es sowohl für WPF als auch für Windows Forms einen Visual Tree Helper, der Elemente rekursiv im Baum findet.
 
-Es ist wichtig, zwischen einem logischen Baum und einem visuellen Baum zu unterscheiden. Der Unterschied liegt darin, dass im visuellen Baum nur sichtbare Objekte berücksichtigt werden, während im logischen Baum auch Objekte enthalten sind, die beispielsweise für die Templates sichtbarer Elemente verwendet werden.
+Eine klare Unterscheidung zwischen dem logischen und dem visuellen Baum ist wesentlich und wird in Abbildung \ref{fig:logical_visual_tree} veranschaulicht. Während der visuelle Baum ausschließlich die tatsächlich sichtbaren Elemente einer Benutzeroberfläche umfasst, beschreibt der logische Baum die hierarchische Struktur der Ansicht, einschließlich jener Objekte, die beispielsweise als Container, Templates oder Datenprovider für sichtbare Elemente dienen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{4_Logical_Visual_Tree}
+    \caption{Visueller und logischer Elementbaum}
+    \label{fig:logical_visual_tree}
+\end{figure}
 
 \section{AssemblyResolver}
-Für die Konfiguration in Abschnitt \ref{sec:configuration_concept} 
+\label{sec:assembly_resolver}
+Für die Konfiguration in Abschnitt \ref{sec:configuration_concept} müssen bestimmte Assemblies (siehe Unterabschnitt \ref{subsec:assemblies}) gefunden werden, die Klassen enthalten, welche ein bestimmtes Interface implementieren.
+
+Da dies insbesondere bei größeren Anwendungen zu Performanceproblemen führen kann, werden alle relevanten Assemblies bereits während des Build-Prozesses auf die Implementierung entsprechender Interfaces überprüft. Die dabei gefundenen Assemblies werden anschließend registriert und in einem Zwischenspeicher abgelegt.
+
+Bei späteren Suchvorgängen nach Klassen, die ein bestimmtes Interface implementieren, müssen dadurch nicht mehr alle Assemblies durchsucht werden, sondern nur diejenigen, die tatsächlich relevant sind. Dies reduziert den Suchaufwand und verbessert die Ladezeit der Anwendung.
