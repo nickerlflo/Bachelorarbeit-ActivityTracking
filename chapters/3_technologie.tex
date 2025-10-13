@@ -34,7 +34,7 @@ Abbildung \ref{fig:assemblies_dotnet} zeigt, wie eine Assembly aus mehreren Quel
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{2_Assemblies_Dotnet}
+    \includegraphics[width=0.9\textwidth]{3_Assemblies_Dotnet}
     \caption{Assemblies Aufbau und Generierung}
     \label{fig:assemblies_dotnet}
 \end{figure}
@@ -87,9 +87,9 @@ Da das Erzeugen von Threads Systemressourcen kostet, stellt C\# (Unterabschnitt 
 In C\# (siehe Unterabschnitt \ref{subsec:csharp}) existieren mehrere Konzepte, um Abläufe verzahnt (auf einem einzelnen Kern) oder parallel (auf mehreren Kernen) auszuführen, wie im Buch \cite{sarcar2004design} beschrieben. Zu diesen Konzepten zählen:
 
 \begin{itemize}
-    \item Asynchronous Programming Model: Umsetzung über Delegate.BeginInvoke und Delegate.EndInvoke.
-    \item Event-based Asynchronous Pattern: Ein Thread führt eine Aufgabe aus und informiert einen Observer über deren Abschluss.
-    \item Task-based Asynchronous Pattern: Ein Task ist eine Einheit, die eine bestimmte Aufgabe ausführt und Informationen über deren Status enthält.
+    \item \textbf{Asynchronous Programming Model:} Umsetzung über Delegate.BeginInvoke und Delegate.EndInvoke.
+    \item \textbf{Event-based Asynchronous Pattern:} Ein Thread führt eine Aufgabe aus und informiert einen Observer über deren Abschluss.
+    \item \textbf{Task-based Asynchronous Pattern:} Ein Task ist eine Einheit, die eine bestimmte Aufgabe ausführt und Informationen über deren Status enthält.
 \end{itemize}
 
 In dieser Arbeit wird das Task-based Asynchronous Pattern verwendet, da es die Nutzung von async und await ermöglicht.
@@ -128,7 +128,7 @@ Windows Presentation Foundation \cite{microsoft_wpf_overview} ist ein Framework 
 
 Um die UI-Elemente anzusteuern, gibt es eine Code-Behind-Datei, welche eine Partial-Klasse zu der aus dem XAML generierten Klasse darstellt. Dort können Events behandelt oder anderer view-spezifischer Code ausgeführt werden. Dies wird im Buch \cite{james2015pro} näher erläutert und an Beispielen dargestellt.
 
-\subsubsection{Event-System WPF}
+\subsubsection{Event-System}
 Events stellen die Basis für den Zugriff auf das Verhalten in einer Ansicht dar. WPF bietet hierzu \emph{Routed Events} \cite{microsoft_wpf_routed_events_overview} an. Routed Events sind Events, die im Elementbaum wandern können und die entsprechenden registrierten Handler im Baum informieren. WPF bietet hierfür folgende drei Modelle für das Wandern durch den Baum an:
 
 \begin{itemize}
@@ -137,7 +137,22 @@ Events stellen die Basis für den Zugriff auf das Verhalten in einer Ansicht dar
     \item \textbf{Direct}: Nur Handler auf der Source werden über das Ereignis informiert
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{3_Routed_Events}
+    \caption{Reihenfolge Ereignisverarbeitung. Quelle: \cite{microsoft_wpf_routed_events_overview}}
+    \label{fig:routed_events}
+\end{figure}
+
+In der Abbildung \ref{fig:routed_events} werden Tunneling und Bubbling durch Pfeile im Elementbaum dargestellt. Dabei soll unter anderem gezeigt werden, dass Preview-Events das Tunneling-Verfahren verwenden und erst anschließend das eigentliche Event über Bubbling propagiert wird.
+
 \subsection{Windows Forms}
 \label{subsec:Winforms}
+Windows Forms \cite{microsoft_winforms_overview} ist die Vorgängertechnologie von WPF (siehe Unterabschnitt \ref{subsec:WPF}) und besteht ebenfalls aus einer Designer-Datei und einer Code-Behind-Datei. Die Designer-Datei enthält dabei direkt Code, der den Aufbau des Steuerelementbaums beschreibt, während die Code-Behind-Datei die Anwendungslogik implementiert. Windows Forms basiert nicht explizit auf einem Design-Pattern wie MVVM (siehe Unterabschnitt \ref{subsec:mvvm}). Im zu integrierenden System wird jedoch das MVP-Pattern verwendet (siehe Unterabschnitt \ref{subsec:mvp}). Dadurch befindet sich in der Code-Behind-Datei nur noch die für die View notwendige Anzeigelogik.
+
+\subsubsection{Event-System}
+Events in Windows Forms \cite{microsoft_winforms_events_overview} sind grundsätzlich nicht routed, sondern werden nur von den am jeweiligen Steuerelement registrierten Event-Handlern verarbeitet. Es gibt jedoch Ausnahmen bei Steuerelementen, die keinen eigenen Fenster-Handle besitzen und daher keine Events direkt empfangen können. In diesen Fällen übernimmt das übergeordnete Steuerelement (Parent) die Ereignisverarbeitung und leitet das Event gegebenenfalls weiter. Solche Events können somit sowohl vom Parent- als auch vom Child-Element behandelt werden. Das Verhalten hängt dabei häufig von Einstellungen wie KeyPreview \cite{microsoft_form_keypreview} ab und muss entsprechend berücksichtigt werden.
+
+
 
 

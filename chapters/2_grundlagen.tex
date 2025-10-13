@@ -198,12 +198,10 @@ Der Zusammenhang zwischen den einzelnen Komponenten wird in Abbildung \ref{fig:m
 \end{figure}
 
 \subsubsection{View}
-\label{subsubsec:view_for_mvvm}
 Die View stellt gemeinsam mit dem ViewModel den Präsentations-Layer dar. Der Code für die View wird häufig durch sogenannte Designer \footnote{Programme, die eine Benutzeroberfläche bereitstellen, mit deren Hilfe UI-Elemente platziert und der Stil festgelegt werden kann. 
 Diese Tools ermöglichen es Designern, auch ohne Programmierkenntnisse eine Benutzeroberfläche zu erstellen.} erzeugt und in einem XML-basierten Format wie z.\,B. XAML (in WPF) gespeichert. Die View enthält ausschließlich visuelle Elemente sowie die Logik, die für die Anzeige erforderlich ist (z.\,B. Animationen). Views, die Daten anzeigen, werden, wie in Abbildung \ref{fig:mvvm_pattern} gezeigt, über ein DataBinding mit den benötigten Informationen versorgt. Dazu hält die View eine Referenz auf das ViewModel, um das Binding herzustellen.
 
 \subsubsection{Model}
-\label{subsubsec:model_for_mvvm}
 Die Business-Logik bzw. Domain-Logik enthält das Datenmodell, das unabhängig von der View und dem ViewModel verwendet werden kann. 
 Daher besteht eine strikte Trennung zwischen Präsentationsschicht und Model. 
 Dies ermöglicht die Wiederverwendung des Models in verschiedenen Anwendungen, ohne dass Änderungen an der Darstellung Anpassungen im Model erfordern. 
@@ -219,6 +217,7 @@ Das DataBinding (siehe Abbildung \ref{fig:mvvm_pattern}) ist der Datenkanal, üb
 Beide Seiten werden über Datenänderungen informiert und synchronisieren sich je nach Art des Bindings automatisch.
 
 \subsection{MVP}
+\label{subsec:mvp}
 Wie bereits das in Unterabschnitt \ref{subsec:mvvm} beschriebene Model–View–ViewModel (MVVM) Pattern hat auch das Model–View–Presenter (MVP) Pattern seinen Ursprung im Model–View–Controller (MVC) Pattern \cite{Krasner1988MVC}. 
 IBM entwickelte daraus die erste Version dieses Patterns, wie im Artikel \cite{potel1996mvp} beschrieben wird. 
 Die für diese Arbeit relevante Variante, das sogenannte \textit{Passive View Pattern}, wird in einer Publikation zu den sogenannten MV*-Patterns \cite{mvp_ieee} erläutert und bildet die Grundlage für einen Teil dieser Arbeit.
