@@ -124,12 +124,12 @@ In diesem Abschnitt werden die UI-Frameworks aus der .NET-Umgebung (siehe Abschn
 
 \subsection{WPF}
 \label{subsec:WPF}
-Windows Presentation Foundation \cite{microsoft_wpf_overview} ist ein Framework zur Entwicklung von Windows-Desktop-Applikationen. Es baut auf dem in Abschnitt \ref{fig:mvvm_pattern} erläuterten MVVM-Pattern auf und verwendet für das Erstellen der Ansichten XAML, einen XML-Dialekt. 
+Windows Presentation Foundation \cite{microsoft_wpf_overview} ist ein Framework zur Entwicklung von Windows-Desktop-Applikationen. Es baut auf dem in Unterabschnitt \ref{subsec:mvvm} erläuterten MVVM-Pattern auf und verwendet für das Erstellen der Ansichten XAML, einen XML-Dialekt. 
 
 Um die UI-Elemente anzusteuern, gibt es eine Code-Behind-Datei, welche eine Partial-Klasse zu der aus dem XAML generierten Klasse darstellt. Dort können Events behandelt oder anderer view-spezifischer Code ausgeführt werden. Dies wird im Buch \cite{james2015pro} näher erläutert und an Beispielen dargestellt.
 
 \subsubsection{Event-System}
-Events stellen die Basis für den Zugriff auf das Verhalten in einer Ansicht dar. WPF bietet hierzu \emph{Routed Events} \cite{microsoft_wpf_routed_events_overview} an. Routed Events sind Events, die im Elementbaum wandern können und die entsprechenden registrierten Handler im Baum informieren. WPF bietet hierfür folgende drei Modelle für das Wandern durch den Baum an:
+Events stellen die Basis für den Zugriff auf das Verhalten in einer Ansicht dar. WPF bietet hierzu Routed Events \cite{microsoft_wpf_routed_events_overview} an. Routed Events sind Events, die im Elementbaum wandern können und die entsprechenden registrierten Handler im Baum informieren. WPF bietet hierfür folgende drei Modelle für das Wandern durch den Baum an:
 
 \begin{itemize}
     \item \textbf{Bubbling}: Das Event wandert von der Source zum Wurzelelement (Window)

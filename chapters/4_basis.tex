@@ -4,7 +4,7 @@ Da die Arbeit bereits in ein bestehendes System integriert wird, gibt es Möglic
 
 \section{MVVM spezifische Erweiterungen}
 \label{sec:mvvm_extensions}
-Grundsätzlich basiert das WPF-System (siehe Unterabschnitt \ref{subsec:WPF}) auf dem in Unterabschnitt \ref{fig:mvvm_pattern} beschriebenen MVVM-Pattern. Würde jedoch die gesamte Logik direkt in die Vererbungshierarchie der ViewModels integriert werden, würde dies die Flexibilität erheblich einschränken und die Komplexität deutlich erhöhen. Daher wurde das MVVM-Pattern an die spezifischen Anforderungen der Anwendung angepasst.
+Grundsätzlich basiert das WPF-System (siehe Unterabschnitt \ref{subsec:WPF}) auf dem in Unterabschnitt \ref{subsec:mvvm} beschriebenen MVVM-Pattern. Würde jedoch die gesamte Logik direkt in die Vererbungshierarchie der ViewModels integriert werden, würde dies die Flexibilität erheblich einschränken und die Komplexität deutlich erhöhen. Daher wurde das MVVM-Pattern an die spezifischen Anforderungen der Anwendung angepasst.
 
 \subsection{Presenter}
 Bindings ermöglichen zwar einen relativ einfachen Datenaustausch zwischen View und ViewModel, jedoch treten häufig Situationen auf, in denen Daten das Verhalten der View beeinflussen oder Aktionen im ViewModel ausgelöst werden müssen, die sich über einfache Commands\footnote{Commands \cite{wpf_commanding_overview} sind ein Konzept, bei dem ein Objekt erstellt wird, das eine Aufgabe ausführt, wenn es getriggert wird. Dieses Objekt kann über ein Binding ausgetauscht werden.} nicht mehr abbilden lassen. 
