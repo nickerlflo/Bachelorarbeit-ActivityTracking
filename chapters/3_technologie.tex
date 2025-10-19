@@ -67,7 +67,7 @@ Reflection ist ein sehr mächtiges Werkzeug, bringt jedoch Leistungseinbußen mi
 \label{subsec:async}
 Für trackingbasierte Prozesse ist es wichtig, dass diese die Usability des bestehenden Systems nicht beeinträchtigen. Würden Tracking-Abläufe synchron mit der Benutzeroberfläche ausgeführt werden, könnte die UI währenddessen nicht auf Benutzereingaben reagieren. Daher spielt die asynchrone Programmierung eine entscheidende Rolle in dieser Arbeit.
 
-\subsection{Grundlegende Funktionsweise}
+\subsubsection{Grundlegende Funktionsweise}
 Um Aufgaben nebenläufig ausführen zu können, bietet .NET (Abschnitt \ref{sec:dotnet}) die Möglichkeit, Threads zu verwenden. Threads sind leichtgewichtige Prozesse, die denselben Heap teilen, jedoch jeweils über einen eigenen Stack verfügen. Sie sind, abhängig vom Betriebssystem, ein grundlegender Bestandteil des Systems. Threads können zur Laufzeit erzeugt werden und führen dann Methoden wie im Programm \ref{prog:thread_based_programming} gezeigt aus. Nach Abschluss der Methode beendet sich der Thread und die Ressourcen werden vom Betriebssystem freigegeben. Threads sind ein zentraler Bestandteil von .NET und werden in einem Artikel von Microsoft \cite{Microsoft_ThreadsAndThreading} näher beschrieben.
 
 \begin{program}[H]
