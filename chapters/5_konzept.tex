@@ -73,13 +73,53 @@ Wenn die Anwendung das Ausliefern der Daten anstößt, fordert der Tracking-Mana
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{5_Sequence_Diagram_Components_Communication.pdf}
+    \includegraphics[width=1.07\textwidth]{5_Sequence_Diagram_Components_Communication}
     \caption{Ablauf der Kommunikation zwischen den Komponenten}
     \label{fig:sequence_diagram_communication_components}
 \end{figure}
 
-\section{Tracking Konfiguration}
+\section{Tracking-Konfiguration}
 \label{sec:configuration_concept}
+Wie bei Google Analytics (siehe Unterabschnitt \ref{subsec:google_analytics}) und OpenTelemetry (siehe Unterabschnitt \ref{subsec:open_telemetry}) verfügt auch dieses Framework über eine Konfiguration, in der festgelegt wird, welche Daten getrackt werden sollen. Für das hier vorgestellte Framework ist eine hybride Lösung vorgesehen, die sowohl Online-Konfigurationen, wie bei Google Analytics, als auch Code-basierte Konfigurationen, wie bei OpenTelemetry, ermöglicht. In dieser Arbeit wird jedoch ausschließlich die zweite Variante konzipiert und umgesetzt.
+
+\subsection{Aufbau der Konfigurationskomponente}
+Der Aufbau der Konfigurationskomponente ist in Abbildung \ref{fig:configuration_component} dargestellt. Diese Komponente besteht aus einem Manager, der sowohl für die Initialisierung als auch für die Bereitstellung der Aufgaben verantwortlich ist. Der Manager agiert dabei als Slave des Hauptmanagers.
+
+Das Erstellen der Konfiguration erfolgt durch sogenannte Configuration Builder, die zuvor über eine Fluent API \footnote{Unter einer Fluent API oder auch einem Fluent Interface \cite{Fowler2005FluentInterface} versteht man eine Methodik des Method-Chaining, bei der Konfigurationen in einer flüssigen, satzähnlichen Syntax formuliert werden können.} definiert werden. Optional soll die Komponente so erweitert werden können, dass künftig auch ein Konfigurationsserver angebunden werden kann. Im Rahmen dieser Arbeit bleibt dies jedoch unberücksichtigt.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{5_Configuration_Component}
+    \caption{Aufbau der Konfigurationskomponente}
+    \label{fig:configuration_component}
+\end{figure}
+
+\subsection{Konfigurationsmöglichkeiten und Fluent API}
+
+\subsubsection{Kategorien von Informationen}
+Um die ursprünglich definierten Fragen (siehe Unterabschnitt \ref{subsec:initial_questions}) beantworten zu können, müssen bestimmte Informationen gesammelt werden. Diese lassen sich in folgende Kategorien einteilen:
+
+\begin{itemize}
+    \item \textbf{Metriken:} Zahlenbasierte Daten, wie sie bereits im Zusammenhang mit OpenTelemetry (siehe Unterabschnitt \ref{subsec:open_telemetry}) beschrieben wurden. Beispiele hierfür sind die Ladezeit einer Ansicht oder die Anzahl der Öffnungen einer bestimmten Ansicht.
+    \item \textbf{Daten:} Informationen, die beispielsweise aus einer Ansicht extrahiert werden können, etwa die Anzahl der Einträge in einer Liste.
+    \item \textbf{Nutzung:} Informationen, die Aufschluss über das Nutzungsverhalten der Anwendung geben, beispielsweise wie häufig ein Shortcut in einer bestimmten Ansicht verwendet wird.
+    \item \textbf{Workflows:} Informationen, die mit Traces in OpenTelemetry vergleichbar sind und einen Ablauf von aufeinanderfolgenden Aktionen darstellen.
+\end{itemize}
+
+\subsubsection{Aufbau der Fluent API}
+Die zuvor kategorisierten Daten können weiter beschrieben werden, woraus sich ein Schema ableiten lässt, das für den Aufbau der Fluent API von zentraler Bedeutung ist.\\
+\\
+$Kontext \rightarrow Kategorie \rightarrow Kategorieoptionen$\\
+\\
+Daten stammen stets aus einem bestimmten Kontext und gehören zu einer der oben definierten Kategorien. Diese Daten können anschließend durch spezifische Optionen weiter unterteilt werden. Ein vereinfachter Ausschnitt der Fluent API nach diesem Schema wird in Abbildung~\ref{fig:configuration_component_fluent_api} als Syntaxdiagramm dargestellt. Mit der in der Abbildung gezeigten API ist es möglich, das Anfordern von Daten aus einer Ansicht zu konfigurieren.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{5_Configuration_Component_Fluent_API.pdf}
+    \caption{Vereinfachter Ausschnitt der Fluent API Tracking-Konfiguration}
+    \label{fig:configuration_component_fluent_api}
+\end{figure}
+
 
 \section{Daten- und Aktionsermittlung}
 \label{sec:data_collection_concept}
