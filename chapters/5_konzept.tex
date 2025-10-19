@@ -127,7 +127,7 @@ Builder (siehe Buch \cite{sarcar2004design}) sind spezielle Klassen, die konfigu
 In Abbildung \ref{fig:configuration_component_fluent_api} ist von zwei Builder-Leveln die Rede. Der Grund dafür liegt darin, dass ein einzelner Builder sehr umfangreich und unübersichtlich werden würde. Um die Wartbarkeit und Erweiterbarkeit zu verbessern, werden die Builder daher in mehrere Ebenen unterteilt.  
 Der Builder der ersten Ebene ruft die Build Methode der nachfolgenden Ebenen auf und fügt deren Ergebnisse zusammen. Dieses Prinzip folgt dem Composite Pattern (siehe \cite{gamma1995design}).
 
-\subsection{Settings}
+\subsection{Settings und deren Zusammenhang mit Builder}
 Aus Sicht der Anwender der API existieren keine Builder direkt. Die Fluent API verwendet stattdessen bestimmte Settings, die am Ende einem Builder hinzugefügt werden. Auf Grundlage dieser Einstellungen kann der Builder anschließend die entsprechenden Objekte erstellen, beispielsweise die Aufgaben zur Datenermittlung (siehe Abschnitt~\ref{sec:data_collection_concept}) und zur Extraktion der Daten (siehe Abschnitt~\ref{sec:data_extraction_concept}).  
 Dieser Zusammenhang wird in Abbildung \ref{fig:builder_and_settings_cooperation} dargestellt.
 
