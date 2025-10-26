@@ -30,7 +30,7 @@ Diese Struktur sorgt für eine hohe Flexibilität. Änderungen, die von der Syst
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{5_Systemdesign_Components_Tracking}
-    \caption{Zusammenhänge der Komponenten im Tracking-Framework}
+    \caption{Zusammenhänge der Komponenten im Tracking-Framework.}
     \label{fig:system_design_components}
 \end{figure}
 
@@ -74,7 +74,7 @@ Wenn die Anwendung das Ausliefern der Daten anstößt, fordert der Tracking-Mana
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.07\textwidth]{5_Sequence_Diagram_Components_Communication}
-    \caption{Ablauf der Kommunikation zwischen den Komponenten}
+    \caption{Ablauf der Kommunikation zwischen den Komponenten.}
     \label{fig:sequence_diagram_communication_components}
 \end{figure}
 
@@ -100,7 +100,7 @@ Das Erstellen der Konfiguration erfolgt durch sogenannte Configuration Builder, 
 Um die ursprünglich definierten Fragen (siehe Unterabschnitt \ref{subsec:initial_questions}) beantworten zu können, müssen bestimmte Informationen gesammelt werden. Diese lassen sich in folgende Kategorien einteilen:
 
 \begin{itemize}
-    \item \textbf{Metriken:} Zahlenbasierte Daten, wie sie bereits im Zusammenhang mit OpenTelemetry (siehe Unterabschnitt \ref{subsec:open_telemetry}) beschrieben wurden. Beispiele hierfür sind die Ladezeit einer Ansicht oder die Anzahl der Öffnungen einer bestimmten Ansicht.
+    \item \textbf{Metriken:} Zahlenbasierte Daten, wie sie bereits im Zusammenhang mit OpenTelemetry beschrieben wurden. Beispiele hierfür sind die Ladezeit einer Ansicht oder die Anzahl der Öffnungen einer bestimmten Ansicht.
     \item \textbf{Daten:} Informationen, die beispielsweise aus einer Ansicht extrahiert werden können, etwa die Anzahl der Einträge in einer Liste.
     \item \textbf{Nutzung:} Informationen, die Aufschluss über das Nutzungsverhalten der Anwendung geben, beispielsweise wie häufig ein Shortcut in einer bestimmten Ansicht verwendet wird.
     \item \textbf{Workflows:} Informationen, die mit Traces in OpenTelemetry vergleichbar sind und einen Ablauf von aufeinanderfolgenden Aktionen darstellen.
@@ -116,25 +116,25 @@ Daten stammen stets aus einem bestimmten Kontext und gehören zu einer der oben 
 \begin{figure}[H]
     \centering
     \includegraphics{5_Configuration_Component_Fluent_API}
-    \caption{Vereinfachter Ausschnitt der Fluent API Tracking-Konfiguration}
+    \caption{Vereinfachter Ausschnitt der Fluent API für die Tracking-Konfiguration.}
     \label{fig:configuration_component_fluent_api}
 \end{figure}
 
 \subsection{Builder und deren Funktionsweise}
-Builder (siehe Buch \cite{sarcar2004design}) sind spezielle Klassen, die konfiguriert werden können und anschließend durch den Aufruf einer Build-Methode entsprechende Objekte erzeugen. Nach der Erzeugung können diese Objekte vom Builder abgerufen werden. Der Director ist die Komponente, die den Erstellungsprozess steuert. Im Kontext dieser Arbeit übernimmt der Manager diese Rolle.
+Builder \cite{sarcar2004design} sind spezielle Klassen, die konfiguriert werden können und anschließend durch den Aufruf einer Build-Methode entsprechende Objekte erzeugen. Nach der Erzeugung können diese Objekte vom Builder abgerufen werden. Der Director ist die Komponente, die den Erstellungsprozess steuert. Im Kontext dieser Arbeit übernimmt der Manager diese Rolle.
 
 \subsubsection{Bessere Aufgabenteilung durch mehrstufige Builder}
 In Abbildung \ref{fig:configuration_component_fluent_api} ist von zwei Builder-Leveln die Rede. Der Grund dafür liegt darin, dass ein einzelner Builder sehr umfangreich und unübersichtlich werden würde. Um die Wartbarkeit und Erweiterbarkeit zu verbessern, werden die Builder daher in mehrere Ebenen unterteilt.  
-Der Builder der ersten Ebene ruft die Build Methode der nachfolgenden Ebenen auf und fügt deren Ergebnisse zusammen. Dieses Prinzip folgt dem Composite Pattern (siehe \cite{gamma1995design}).
+Der Builder der ersten Ebene ruft die Build Methode der nachfolgenden Ebenen auf und fügt deren Ergebnisse zusammen. Dieses Prinzip folgt dem Composite-Muster \cite{gamma1995design}.
 
 \subsection{Settings und deren Zusammenhang mit Builder}
-Aus Sicht der Anwender der API existieren keine Builder direkt. Die Fluent API verwendet stattdessen bestimmte Settings, die am Ende einem Builder hinzugefügt werden. Auf Grundlage dieser Einstellungen kann der Builder anschließend die entsprechenden Objekte erstellen, beispielsweise die Aufgaben zur Datenermittlung (siehe Abschnitt~\ref{sec:data_collection_concept}) und zur Extraktion der Daten (siehe Abschnitt~\ref{sec:data_extraction_concept}).  
+Aus Sicht der Anwender*innen der API existieren keine Builder direkt. Die Fluent API verwendet stattdessen bestimmte Settings, die am Ende einem Builder hinzugefügt werden. Auf Grundlage dieser Einstellungen kann der Builder anschließend die entsprechenden Objekte erstellen, beispielsweise die Aufgaben zur Datenermittlung (siehe Abschnitt~\ref{sec:data_collection_concept}) und zur Extraktion der Daten (siehe Abschnitt~\ref{sec:data_extraction_concept}).  
 Dieser Zusammenhang wird in Abbildung \ref{fig:builder_and_settings_cooperation} dargestellt.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{5_Configuration_Concept_Builder_Class_Diagramm}
-    \caption{Klassendiagramm Builder und Settings Zusammenhang}
+    \caption{Klassendiagramm für den Zusammenhang zwischen Builder und Settings.}
     \label{fig:builder_and_settings_cooperation}
 \end{figure}
 
