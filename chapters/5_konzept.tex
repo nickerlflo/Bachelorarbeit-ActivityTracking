@@ -138,6 +138,13 @@ Dieser Zusammenhang wird in Abbildung \ref{fig:builder_and_settings_cooperation}
     \label{fig:builder_and_settings_cooperation}
 \end{figure}
 
+\subsection{Bereitstellen von Einstellungen}
+Wie bereits erläutert, werden Einstellungen über eine Fluent-API konfiguriert und einem Builder hinzugefügt. Da Softwaresysteme häufig sehr umfangreich sind, werden sie meist in kleinere Teilprojekte unterteilt. Die in dieser Arbeit behandelte Integration (siehe Kapitel \ref{cha:implementierung}) bezieht sich genau auf ein solches System.
+
+Aus diesem Grund erfolgt die Konfiguration auf Assembly-Basis (siehe Abschnitt \ref{subsec:assemblies}). Konkret bedeutet das, dass pro Assembly mehrere Settings-Provider existieren können, die beim Erstellen einer Konfiguration ausgelesen werden. Diese Provider erhalten eine Starteinstellung (den Einstiegspunkt der Fluent-API) und wenden die entsprechenden Einstellungen automatisch über die API auf einen Builder an.
+
+Diese Provider werden von den Entwickler*innen implementiert, indem die Fluent-API wiederholt auf die jeweilige Starteinstellung angewendet wird. Dabei wird festgelegt, welche Informationen aus dem jeweiligen Teil der Anwendung (der sich in derselben Assembly befinden muss) ermittelt werden sollen.
+
 \section{Daten- und Aktionsermittlung}
 \label{sec:data_collection_concept}
 
