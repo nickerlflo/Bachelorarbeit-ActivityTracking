@@ -39,6 +39,7 @@ Die lose Kopplung besteht nicht nur zwischen den internen Komponenten des Framew
 Die Anwendung selbst muss im Wesentlichen lediglich die erforderlichen Daten über eine definierte Schnittstelle bereitstellen. Dadurch lässt sich das System flexibel in unterschiedlichen Technologien einsetzen, beispielsweise in WPF (siehe Unterabschnitt \ref{subsec:WPF}) oder Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}).
 
 \subsection{Kommunikation zwischen Komponenten}
+\label{subsec:communication_between_coponents}
 
 \subsubsection{Kommunikationsgrundlage}
 Damit ein Informationsaustausch zwischen den Komponenten möglich ist, wird eine gemeinsame Kommunikationsbasis benötigt. Diese Grundlage besteht aus Objekten, die die gemeinsame Sprache für den Datenaustausch definieren.  
@@ -147,6 +148,88 @@ Diese Provider werden von den Entwickler*innen implementiert, indem die Fluent-A
 
 \section{Daten- und Aktionsermittlung}
 \label{sec:data_collection_concept}
+Auf Basis der Konfiguration wird, wie bereits beschrieben, ein Tracking-Auftrag erteilt. Dieser Auftrag kann anschließend von der Anwendung abgearbeitet werden. Wie diese Abarbeitung im Detail erfolgt, wird in diesem Abschnitt erläutert.
+
+\subsection{Komponentenstruktur und Aufgabenverteilung}
+Abbildung \ref{fig:structure_data_collection} zeigt die Struktur der Daten- und Aktionsermittlungskomponente. Teile dieser Struktur wie die Provider befinden sich innerhalb der Anwendung, während ein Manager die Integration in das Trackingsystem übernimmt. In diesem Unterabschnitt wird dargestellt, welchen Beitrag die einzelnen Bestandteile zur Datenermittlung leisten.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.52\textwidth]{5_Data_Collection_Structure.pdf}
+\caption{Struktur der Datenermittlungskomponente.}
+\label{fig:structure_data_collection}
+\end{figure}
+
+\subsubsection{Manager für Datenermittlung}
+Zunächst ist entscheidend, dass in diesem Kontext unter Datenermittlung sowohl die Erfassung von Aktionen als auch der daraus resultierenden Daten verstanden wird. Der Manager übernimmt daher die Aufgabe, die Zugangskontrolle für beide Arten von Providern sicherzustellen. Dabei wird geprüft, ob ein Provider einen Beitrag zum jeweiligen Tracking-Auftrag leisten kann. Ist dies der Fall, bestätigt der Manager die Teilnahme des Providers durch die Bereitstellung eines Datenkanals.
+
+Wenn anschließend Aktionen über diesen Datenkanal übermittelt werden, ist es die Aufgabe des Managers, die entsprechenden DataProvider zu informieren und die Ermittlung der zugehörigen Daten auszulösen.
+
+Der Datenkanal wird vom Manager wiederum an einen übergeordneten Datenkanal weitergeleitet, der vom Hauptmanager bereitgestellt wird. Damit ist der Manager dem Hauptmanager untergeordnet, analog zum Aufbau beim Konfigurationsmanager.
+
+Insgesamt verwaltet der Manager somit die Tracking-Aufträge und stellt sicher, dass diese ordnungsgemäß und vollständig ausgeführt werden, wie in Abbildung \ref{fig:structure_data_collection} dargestellt ist.
+
+\subsubsection{Provider für Aktionen}
+Aktionen sind, wie bereits in Unterabschnitt \ref{subsec:communication_between_coponents} beschrieben, ein wesentlicher Bestandteil der Kommunikation von Ereignissen innerhalb der Anwendung. Sie werden von speziellen Action Providern bereitgestellt, sofern dies vom Manager für Datenermittlung vorgesehen ist.
+
+Die Aktionen werden im jeweiligen Provider über eine Fabrikkomponente erzeugt, deren Implementierung je nach System variieren kann. Provider sind nur aktiv, wenn ihre Registrierung beim zugehörigen Manager erfolgreich abgeschlossen wurde.
+
+Die Übergabe der Aktionen erfolgt nach dem Push-Prinzip, um eine asynchrone Weiterverarbeitung und Filterung zu ermöglichen. Dadurch soll verhindert werden, dass es zu spürbaren Verzögerungen in der Benutzeroberfläche der Anwendung kommt.
+
+Es existiert eine vorgegebene Menge an Providern, die für das korrekte Funktionieren des Frameworks erforderlich sind. Darüber hinaus können jedoch beliebige weitere Provider integriert werden. Auf die vordefinierten Provider wird in Unterabschnitt \ref{subsec:required_provider_and_data} näher eingegangen.
+
+\subsubsection{Provider für nachfolgende Daten}
+Wie bereits erwähnt, können Daten auf Basis von Aktionen ermittelt werden. Diese Daten werden über Standard-Datenprovider bereitgestellt. Dabei müssen diese Provider nicht zwingend auf Aktionen reagieren, sie können auch unabhängig davon Daten ermitteln.
+
+Der Standardfall besteht jedoch darin, dass Daten infolge von Aktionen über den zugehörigen Manager angefordert werden (z.B. Property-Daten, nachdem eine Komponente der Anwendung initialisiert wurde). Eine Registrierung, wie sie auch bei den Action Providern erforderlich ist, ist ebenfalls notwendig. Provider sind somit nur aktiv, wenn sie laut Konfiguration (siehe Abschnitt \ref{sec:configuration_concept}) tatsächlich benötigt werden.
+
+Der Aufbau der Datenprovider für nachfolgende Daten ist dem der Action Provider sehr ähnlich und wird daher ebenfalls in Unterabschnitt \ref{subsec:required_provider_and_data} beschrieben. Auch hier existiert eine festgelegte Menge an Providern, die für das ordnungsgemäße Funktionieren der Anwendung erforderlich sind.
+
+\subsection{Benötigte Daten und Provider}
+\label{subsec:required_provider_and_data}
+Das Framework arbeitet nach dem Prinzip, dass ausschließlich die Daten verarbeitet werden, die auch bereitgestellt werden. Fehlt daher die Implementierung bestimmter Provider, kann die Qualität der Ergebnisse schwanken, da konfigurierte Aufträge unter Umständen nicht vollständig erfüllt werden.
+
+Soll der volle Funktionsumfang des Frameworks genutzt werden, müssen bestimmte vordefinierte Provider implementiert werden. Dabei kann entweder das bereitgestellte Schema verwendet oder eine eigene Implementierung nach demselben Muster erstellt werden.
+
+\subsubsection{Benötigte Provider für Aktionen}
+Für die nachfolgend aufgelisteten Aktionen müssen Provider implementiert werden, um den vollständigen Funktionsumfang des Frameworks sicherzustellen:
+
+\begin{itemize}
+    \item Aktionen zum Zustand von View und PresentationModel (z. B. initialisiert, geladen)
+    \item Aktionen mit Informationen zu den in einer Ansicht verwendeten Shortcuts
+    \item Aktionen, die Ereignisse beschreiben, die auf Steuerelementen ausgeführt werden
+    \item Aktionen, die die Nutzung bestimmter Funktionen bestätigen (z. B. das Öffnen einer Ansicht zur Datenverarbeitung)
+\end{itemize}
+
+\subsubsection{Benötigte Provider für sonstige Daten}
+Im vollen Funktionsumfang sollen außerdem die folgenden Datentypen ermittelt werden. Auch hierfür sind entsprechende Datenprovider erforderlich:
+
+\begin{itemize}
+    \item Daten zur Ladezeit einer Ansicht
+    \item Daten aus der Ansicht selbst, beispielsweise Informationen zu Properties
+\end{itemize}
+
+\subsubsection{Schema für Provider}
+Die grundlegende Ermittlung der Daten folgt im Wesentlichen stets demselben Ablauf. Aus diesem Grund wird für die benötigten Daten ein Provider-Template bereitgestellt.
+
+Diese Templates orientieren sich am Grundgedanken des Template-Methoden-Musters (siehe Design Patterns der Gang of Four \cite{gamma1995design}). Dabei müssen bestimmte Methoden von den Implementierenden konkret ausgearbeitet werden, um die gewünschten Aktionen in den übergeordneten Algorithmus einzubinden.
+
+Der zugrunde liegende Algorithmus übernimmt anschließend die eigentliche Datenermittlung und stellt die gewonnenen Informationen über den entsprechenden Datenkanal bereit.
+
+Abbildung \ref{fig:structure_data_provider} veranschaulicht die möglichen Strukturen und Implementierungsvarianten für Datenprovider innerhalb dieses Schemas.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.52\textwidth]{5_Data_Provider_Structure.pdf}
+\caption{Schema für Datenprovider}
+\label{fig:structure_data_provider}
+\end{figure}
+
+Wie in Abbildung \ref{fig:structure_data_provider} dargestellt, besteht die Möglichkeit, eigene Implementierungen von Providern zu erstellen. Dennoch wird empfohlen, mindestens den zweiten Layer des Frameworks zu verwenden. Die Basisimplementierung übernimmt bereits die Fehlerbehandlung und das Exception Handling, wodurch mögliche Fehlersituationen automatisch abgefangen werden.
+
+Für den ersten Layer hingegen sind detaillierte Kenntnisse über den Tracking Manager erforderlich, da in dieser Ebene die Registrierung der Provider manuell erfolgen muss.
+
+Für die Standard-Provider sollten daher unbedingt die bereitgestellten Templates verwendet werden, da diese ausreichende Flexibilität bieten und gleichzeitig eine robuste sowie einheitliche Implementierung sicherstellen.
 
 \section{Filterung und Extraktion}
 \label{sec:data_extraction_concept}
