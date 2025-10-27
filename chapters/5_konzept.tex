@@ -157,7 +157,7 @@ Abbildung \ref{fig:structure_data_collection} zeigt die Struktur der Daten- und 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.52\textwidth]{5_Data_Collection_Structure.pdf}
+\includegraphics[width=0.52\textwidth]{5_Data_Collection_Structure}
 \caption{Struktur der Datenermittlungskomponente.}
 \label{fig:structure_data_collection}
 \end{figure}
@@ -222,7 +222,7 @@ Abbildung \ref{fig:structure_data_provider} veranschaulicht die möglichen Struk
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.52\textwidth]{5_Data_Provider_Structure.pdf}
+\includegraphics[width=0.52\textwidth]{5_Data_Provider_Structure}
 \caption{Schema für Datenprovider.}
 \label{fig:structure_data_provider}
 \end{figure}
@@ -243,7 +243,7 @@ Diese Komponente besteht im Wesentlichen aus einer Verarbeitungskette und einem 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{5_Data_Processing_Structure.pdf}
+\includegraphics[width=0.6\textwidth]{5_Data_Processing_Structure}
 \caption{Struktur Datenverarbeitungskomponente.}
 \label{fig:structure_data_processing}
 \end{figure}
@@ -285,7 +285,7 @@ Betrachtet man die vollständige Konfiguration, so ergeben sich Objekte mit folg
     \item \textbf{Metriken:} Sind numerische Werte, die weiter in folgende Kategorien unterteilt werden:
     \begin{itemize}
         \item \textbf{Ladezeiten:} Stellen aggregierte Daten zu den Ladezeiten einer Ansicht dar.
-        \item \textbf{Ansichtsnutzung:} Gibt an, wie oft eine bestimmte Ansicht verwendet wurde.
+        \item \textbf{Ansichtsnutzung:} Wie oft wird eine bestimmte Ansicht verwendet.
     \end{itemize}
     
     \item \textbf{Kontextinformationen:} Daten, die aus einer Ansicht oder einem \textit{PresentationModel} ausgelesen werden.
@@ -296,8 +296,17 @@ Um Flexibilität zu gewährleisten, können die Daten vor der Übergabe in ein e
 
 Die gewünschte Konvertierung muss in der Systemkonfiguration (siehe Abschnitt \ref{sec:integration_concept}) angegeben werden. Für das JSON-Format existiert bereits eine Implementierung, die vom Framework bereitgestellt wird.
 
-
 \section{Systemkonfiguration}
 \label{sec:integration_concept}
+Das Framework benötigt bestimmte Informationen, wie bereits in den vorherigen Komponenten beschrieben wurde. Zudem soll das Framework unabhängig von den Services der Anwendung bleiben und diese nicht direkt referenzieren. Um diese lose Kopplung zur Anwendung zu gewährleisten, stellt die Anwendung eine Systemkonfiguration bereit (siehe Abbildung \ref{fig:structure_relationship_systemconfiguration}). Diese Konfiguration dient als Adapter zwischen Framework und Anwendung und leitet Aufrufe über Delegation an die Anwendung weiter. Die Anwendung entscheidet anschließend selbst, beispielsweise wo und wie Daten publiziert werden oder ob das Tracking überhaupt gestartet werden soll.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.53\textwidth]{5_Tracking_Systemkonfiguration}
+\caption{Systemkonfiguration Aufbau und Beziehung zur Anwendung.}
+\label{fig:structure_relationship_systemconfiguration}
+\end{figure}
+
+
 
 
