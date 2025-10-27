@@ -29,12 +29,13 @@ Diese Struktur sorgt für eine hohe Flexibilität. Änderungen, die von der Syst
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{5_Systemdesign_Components_Tracking}
+    \includegraphics[width=0.65\textwidth]{5_Systemdesign_Components_Tracking}
     \caption{Zusammenhänge der Komponenten im Tracking-Framework.}
     \label{fig:system_design_components}
 \end{figure}
 
-Die lose Kopplung besteht nicht nur zwischen den internen Komponenten des Frameworks, sondern auch zwischen der Anwendung und der Datensammlung (siehe Abbildung \ref{fig:system_design_components}). Welche Daten erfasst werden und an welcher Stelle die Erhebung erfolgt, wird vollständig durch das Framework gesteuert.
+Die lose Kopplung besteht nicht nur zwischen den internen Komponenten des Frameworks, sondern auch zwischen der Anwendung und dem Framework selbst. Die Anwendung stellt die Tracking-Konfiguration, Anwendungsdaten sowie eine Systemkonfiguration bereit. Optional kann sie auch Funktionen zum Filtern und Extrahieren übernehmen.
+Diese Daten werden über eine definierte Schnittstelle sowie vordefinierte Komponenten und Templates an das Framework übermittelt. Dadurch wird sichergestellt, dass für die Integration nur minimale Kenntnisse über das Framework erforderlich sind. In den meisten Fällen erkennt das Framework seine Abhängigkeiten zur Anwendung selbstständig.
 
 Die Anwendung selbst muss im Wesentlichen lediglich die erforderlichen Daten über eine definierte Schnittstelle bereitstellen. Dadurch lässt sich das System flexibel in unterschiedlichen Technologien einsetzen, beispielsweise in WPF (siehe Unterabschnitt \ref{subsec:WPF}) oder Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}).
 
@@ -61,23 +62,23 @@ Ein Datenkanal ist im Rahmen dieser Arbeit als ein Konstrukt zu verstehen, über
 Durch die Systemkonfiguration (siehe Abschnitt \ref{sec:integration_concept}) kann die Anwendung verschiedene Wege der Veröffentlichung oder des Bezugs von Daten anbieten. Auf diese Weise bleibt das System flexibel gegenüber unterschiedlichen Datenquellen und Zielen.
 
 \subsubsection{Ablauf der Kommunikation}
-Der Ablauf der Kommunikation erfolgt über die zuvor beschriebenen Datenobjekte und wird im in Abbildung~\ref{fig:sequence_diagram_communication_components} dargestellten Sequenzdiagramm veranschaulicht.  
+Der Ablauf der Kommunikation erfolgt über die zuvor beschriebenen Datenobjekte und wird im in Abbildung \ref{fig:sequence_diagram_communication_components} dargestellten Sequenzdiagramm veranschaulicht.  
 Wie dort gezeigt, erzeugt die Anwendung zunächst alle benötigten Komponenten. Die Reihenfolge ergibt sich aus den jeweiligen Abhängigkeiten, wobei die genaue Erstellungsreihenfolge zwischen Datenermittlung (Abschnitt \ref{sec:data_collection_concept}), Verarbeitung (Abschnitt \ref{sec:data_extraction_concept}) und Trackingkonfiguration (Abschnitt \ref{sec:configuration_concept}) nicht entscheidend ist.  
 
 Nach der Erzeugung wird der Tracking-Manager initialisiert. Während dieser Initialisierung wird auch die Systemkonfiguration (siehe Abschnitt \ref{sec:integration_concept}) übergeben. Anschließend initialisiert der Tracking-Manager die Trackingkonfiguration, die wiederum die benötigten Assemblies für die Konfiguration ermittelt. Danach kann der Tracking-Manager die Aufgaben für das Tracking anfordern. Diese Aufgaben werden bei der Initialisierung der Komponenten für Datenermittlung sowie für Verarbeitung und Extraktion berücksichtigt.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{5_Sequence_Diagram_Components_Communication}
+    \caption{Ablauf der Kommunikation zwischen den Komponenten.}
+    \label{fig:sequence_diagram_communication_components}
+\end{figure}
 
 Nach Abschluss der Initialisierung kann die Anwendung sogenannte Data Provider registrieren. Dabei entscheidet die Komponente zur Datenermittlung, ob ein Provider einen entsprechenden Datenkanal zur Übertragung von Daten erhält. Über diesen Kanal können sowohl Aktivitätsdaten als auch nachgelieferte Daten gesendet werden.
 
 Die übergebenen Daten werden anschließend in der Extraktionskomponente asynchron zur Anwendung empfangen und weiterverarbeitet.  
 
 Wenn die Anwendung das Ausliefern der Daten anstößt, fordert der Tracking-Manager die Extraktionsdaten an und übergibt sie über den in der Systemkonfiguration bereitgestellten Datenkanal an die entsprechende Zielkomponente.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.07\textwidth]{5_Sequence_Diagram_Components_Communication}
-    \caption{Ablauf der Kommunikation zwischen den Komponenten.}
-    \label{fig:sequence_diagram_communication_components}
-\end{figure}
 
 \section{Tracking-Konfiguration}
 \label{sec:configuration_concept}
@@ -90,7 +91,7 @@ Das Erstellen der Konfiguration erfolgt durch sogenannte Configuration Builder, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{5_Configuration_Component}
+    \includegraphics[width=0.6\textwidth]{5_Configuration_Component}
     \caption{Aufbau der Konfigurationskomponente}
     \label{fig:configuration_component}
 \end{figure}
@@ -151,6 +152,7 @@ Diese Provider werden von den Entwickler*innen implementiert, indem die Fluent-A
 Auf Basis der Konfiguration wird, wie bereits beschrieben, ein Tracking-Auftrag erteilt. Dieser Auftrag kann anschließend von der Anwendung abgearbeitet werden. Wie diese Abarbeitung im Detail erfolgt, wird in diesem Abschnitt erläutert.
 
 \subsection{Komponentenstruktur und Aufgabenverteilung}
+\label{subsec:data_collection_components}
 Abbildung \ref{fig:structure_data_collection} zeigt die Struktur der Daten- und Aktionsermittlungskomponente. Teile dieser Struktur wie die Provider befinden sich innerhalb der Anwendung, während ein Manager die Integration in das Trackingsystem übernimmt. In diesem Unterabschnitt wird dargestellt, welchen Beitrag die einzelnen Bestandteile zur Datenermittlung leisten.
 
 \begin{figure}[H]
@@ -221,7 +223,7 @@ Abbildung \ref{fig:structure_data_provider} veranschaulicht die möglichen Struk
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.52\textwidth]{5_Data_Provider_Structure.pdf}
-\caption{Schema für Datenprovider}
+\caption{Schema für Datenprovider.}
 \label{fig:structure_data_provider}
 \end{figure}
 
@@ -233,6 +235,16 @@ Für die Standard-Provider sollten daher unbedingt die bereitgestellten Template
 
 \section{Filterung und Extraktion}
 \label{sec:data_extraction_concept}
+Wie bereits im Unterabschnitt \ref{subsec:data_collection_components} beschrieben, werden die Daten bei der Sammlung nach dem Push-Prinzip weitergegeben, ohne Filterung oder Aggregation vorzunehmen. Dies hat Performance Vorteile (Zeit der Übermittlung ist kürzer als Zeit zum Filtern) und somit muss die Filterung in eine Asynchrone Umgebung nachgelagert werden. Genau diese Umgebenung wird in diesem Abschnitt beschrieben.
+
+\subsection{Komponentenstruktur und Aufgabenverteilung}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{5_Data_Processing_Structure.pdf}
+\caption{Struktur Datenverarbeitungskomponente.}
+\label{fig:structure_data_processing}
+\end{figure}
 
 \section{Systemkonfiguration}
 \label{sec:integration_concept}
