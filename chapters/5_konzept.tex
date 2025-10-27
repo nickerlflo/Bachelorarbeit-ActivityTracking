@@ -91,7 +91,7 @@ Das Erstellen der Konfiguration erfolgt durch sogenannte Configuration Builder, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{5_Configuration_Component}
+    \includegraphics[width=0.55\textwidth]{5_Configuration_Component}
     \caption{Aufbau der Konfigurationskomponente}
     \label{fig:configuration_component}
 \end{figure}
@@ -117,7 +117,7 @@ Daten stammen stets aus einem bestimmten Kontext und gehören zu einer der oben 
 
 \begin{figure}[H]
     \centering
-    \includegraphics{5_Configuration_Component_Fluent_API}
+    \includegraphics[width=0.82\textwidth]{5_Configuration_Component_Fluent_API}
     \caption{Vereinfachter Ausschnitt der Fluent API für die Tracking-Konfiguration.}
     \label{fig:configuration_component_fluent_api}
 \end{figure}
@@ -235,9 +235,11 @@ Für die Standard-Provider sollten daher unbedingt die bereitgestellten Template
 
 \section{Filterung und Extraktion}
 \label{sec:data_extraction_concept}
-Wie bereits im Unterabschnitt \ref{subsec:data_collection_components} beschrieben, werden die Daten bei der Sammlung nach dem Push-Prinzip weitergegeben, ohne Filterung oder Aggregation vorzunehmen. Dies hat Performance Vorteile (Zeit der Übermittlung ist kürzer als Zeit zum Filtern) und somit muss die Filterung in eine Asynchrone Umgebung nachgelagert werden. Genau diese Umgebenung wird in diesem Abschnitt beschrieben.
+Wie bereits im Unterabschnitt \ref{subsec:data_collection_components} beschrieben, werden die Daten während der Sammlung nach dem Push-Prinzip weitergegeben, ohne dass zuvor eine Filterung oder Aggregation erfolgt. Dieses Vorgehen hat Performance-Vorteile, da die Übertragungszeit in der Regel kürzer ist als die Zeit, die für eine Filterung benötigt würde. Daher muss die Filterung in eine asynchrone Umgebung ausgelagert werden. Genau diese Umgebung wird in diesem Abschnitt beschrieben.
 
 \subsection{Komponentenstruktur und Aufgabenverteilung}
+In Abbildung \ref{fig:structure_data_processing} wird die Struktur der Filter- und Extraktionskomponente veranschaulicht.
+Diese Komponente besteht im Wesentlichen aus einer Verarbeitungskette und einem Manager, der wie auch bei anderen Systemkomponenten, die Verwaltung der Komponente übernimmt. Die Datenverarbeitung erfolgt innerhalb der Verarbeitungskette: Die eingehenden Daten werden gefiltert, extrahiert und anschließend, abhängig von den ermittelten Ergebnissen, gegebenenfalls aggregiert. Ein vergleichbares Vorgehen findet sich beispielsweise in OpenTelemetry (siehe Unterabschnitt \ref{subsec:open_telemetry}), wo diese Aufgaben im Collector ausgeführt werden. Welcher Bestandteil der Komponente welchen Beitrag zur Gesamtfunktion leistet, wird im Folgenden näher beschrieben.
 
 \begin{figure}[H]
 \centering
@@ -245,6 +247,55 @@ Wie bereits im Unterabschnitt \ref{subsec:data_collection_components} beschriebe
 \caption{Struktur Datenverarbeitungskomponente.}
 \label{fig:structure_data_processing}
 \end{figure}
+
+\subsubsection{Manager für Verarbeitung und Extraktion}
+Der Manager übernimmt, wie bereits bei den anderen Managern erwähnt, die Kommunikation mit dem übergeordneten Hauptmanager. Zusätzlich ermittelt er die Filter und Extraktoren und erzeugt die Verarbeitungskette. Er nimmt Daten asynchron entgegen und leitet diese an die Verarbeitungskette weiter. Ebenso erhält die Filterkette Extraktionsaufträge und leitet diese an die Verarbeitungskette weiter. Werden die Daten vom Hauptmanager angefordert, übergibt der Manager die extrahierten Daten aus der Verarbeitungskette. Die Hauptaufgabe des Managers liegt somit in der Datenvermittlung und der Steuerung der Verarbeitungskette, wie in Abbildung \ref{fig:structure_data_processing} veranschaulicht.
+
+\subsubsection{Verarbeitungskette}
+Die Verarbeitungskette umfasst die Filter und Extraktoren und steuert deren Initialisierung sowie Ausführung. Die Filterkette entscheidet dabei, welche Filter in welcher Reihenfolge ausgeführt werden. Die Initialisierung erfolgt primär anhand der Extraktionsaufträge, die jeder Extraktor berücksichtigen muss, um die exakt konfigurierte Datenmenge zu erhalten. Die Verarbeitungskette ist austauschbar, z.B. wenn die Strategie für die Ausführungsreihenfolge geändert werden soll.
+
+\subsubsection{Filter}
+Filter folgen einem bestimmten Schema und entscheiden, ob Daten weiterverarbeitet werden. Dies ist beispielsweise sinnvoll, wenn bestimmte Aktionen mehrfach hintereinander auftreten, aber die gleiche Bedeutung haben. Mit einem Filter können nachfolgende Aktionen für eine bestimmte Zeitspanne blockiert werden. Die eingehenden Daten, z.B. Aktionen oder sonstige Informationen, werden bei einem negativen Prüfung verworfen und an die Speicherverwaltung übergeben (siehe Abbildung \ref{fig:structure_data_processing}).
+
+\subsubsection{Extraktoren}
+Extraktoren verarbeiten Daten (Aktionen und sonstige Informationen) basierend auf den Extraktionsaufträgen. Dabei werden die Daten, die nach dem Push-Prinzip übertragen werden, genau auf die Konfiguration zugeschnitten, sodass nur relevante Daten im Ergebnis verbleiben. Die extrahierten Daten werden, wie in Unterabschnitt \ref{subsec:extraction_data_and_converting} beschrieben, weiter aggregiert und in bestimmten Objekten in vorgegebener Form abgelegt.
+
+Um eine schnelle Aggregation und Datenübertragung bei Abruf zu gewährleisten, werden die Daten pro Extraktor gespeichert, kontinuierlich bearbeitet und im Arbeitsspeicher gehalten (siehe Abbildung \ref{fig:structure_data_processing}). Die Speicherung erfolgt im Hauptspeicher und wird nach Programmende oder durch den Garbage Collector freigegeben. Da die Daten nicht zu den primären Anwendungskomponenten gehören, können so Fehler durch externe Speicherung vermieden werden und ein Verlust der Daten hat keine Bedeutung.
+
+\subsection{Extrahierte Daten und Weiterverarbeitung}
+\label{subsec:extraction_data_and_converting}
+Im Unterabschnitt \ref{subsec:communication_between_coponents} wurde beschrieben, dass die Extraktionsdaten als Kommunikationsobjekte fungieren. Genau diese Objekte werden in diesem Teil der Anwendung von den Extraktoren erzeugt. 
+
+\subsubsection{Inhalte der Datenobjekte}
+Betrachtet man die vollständige Konfiguration, so ergeben sich Objekte mit folgendem Inhalt:
+
+\begin{itemize}
+    \item \textbf{Workflow-Daten:} Enthalten den Ablauf eines Workflows als String, abgeleitet aus den Metainformationen des Extraktionsauftrags, sowie die Anzahl der Abläufe eines solchen Workflows.
+    
+    \item \textbf{Automatische Workflow-Daten:} Beinhalten die Aktionen innerhalb einer Ansicht, die in einem bestimmten Zeitraum in einer definierten Reihenfolge auftreten. Diese Daten dienen der weiteren Auswertung.
+    
+    \item \textbf{Nutzungsdaten:} Diese sind weiter unterteilt und enthalten folgende Informationen:
+    \begin{itemize}
+        \item \textbf{Funktionsnutzung:} Beschreibt, wie oft eine bestimmte Funktionalität aufgerufen wurde und um welche Funktion es sich handelt.
+        \item \textbf{Tastaturnutzung:} Beschreibt, wie Shortcuts innerhalb einer Ansicht verwendet wurden.
+        \item \textbf{Steuerelementnutzung:} Beschreibt, welche Ereignisse eines Steuerelements wie häufig auftreten.
+        \item \textbf{Benutzerdefinierte Aktionen:} Beschreibt eine benutzerdefinierte Aktion sowie deren Häufigkeit des Auftretens.
+    \end{itemize}
+    
+    \item \textbf{Metriken:} Sind numerische Werte, die weiter in folgende Kategorien unterteilt werden:
+    \begin{itemize}
+        \item \textbf{Ladezeiten:} Stellen aggregierte Daten zu den Ladezeiten einer Ansicht dar.
+        \item \textbf{Ansichtsnutzung:} Gibt an, wie oft eine bestimmte Ansicht verwendet wurde.
+    \end{itemize}
+    
+    \item \textbf{Kontextinformationen:} Daten, die aus einer Ansicht oder einem \textit{PresentationModel} ausgelesen werden.
+\end{itemize}
+
+\subsubsection{Weiterverarbeitung der Datenobjekte}
+Um Flexibilität zu gewährleisten, können die Daten vor der Übergabe in ein eigenes Format konvertiert werden. Dadurch ist es beispielsweise möglich, die Daten anschließend für Systeme wie Google Analytics (siehe Unterabschnitt \ref{subsec:google_analytics}) weiterzuverarbeiten. 
+
+Die gewünschte Konvertierung muss in der Systemkonfiguration (siehe Abschnitt \ref{sec:integration_concept}) angegeben werden. Für das JSON-Format existiert bereits eine Implementierung, die vom Framework bereitgestellt wird.
+
 
 \section{Systemkonfiguration}
 \label{sec:integration_concept}
