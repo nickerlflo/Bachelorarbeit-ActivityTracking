@@ -5,14 +5,47 @@ Die vollständige Implementierung ist deutlich komplexer, die zugrunde liegenden
 
 \section{Konfiguration}
 \label{sec:configuration_impl}
+Im diesem Abschnitt wird beschrieben, wie die Konfiguration der zu trackenden Daten bereitgestellt und vom Manager der Konfiguration verarbeitet wird. Dabei werden die in Abschnitt \ref{sec:configuration_concept} besprochen Konzepte aufgearbeitet.
 
-\subsection{Ermitteln der Provider}
+\subsection{Bereitstellung der Konfiguration}
+Die Konfiguration wird pro Assembly (siehe Unterabschnitt \ref{subsec:assemblies}) bereitgestellt. Hierzu wird ein Provider im Projekt hinterlegt, der die Logik für die Ansicht und das zugehörige Presentationsmodell enthält.
+
+Dieser Provider implementiert, wie in Programm \ref{prog:settings_provider} gezeigt, das Interface IActivityTrackingSettingsProvider mit zwei generischen Parametern. Diese Parameter definieren die Basistypen der Ansicht und des Presentationsmodells. Dies ist notwendig, um wie in Zeile 7 gezeigt zu überprüfen, ob es sich bei den angegebenen Typen tatsächlich um eine Ansicht handelt. Auf diese Weise wird der Nutzer vor einer falschen Verwendung geschützt.
+
+Der StartSettingAccessor bildet den Einstieg in die Fluent API, über die Settings erstellt und angewendet werden können. Anschließend wird die \texttt{ProvideSettings}-Methode über Reflection (siehe Unterabschnitt \ref{subsec:reflection}) aufgerufen. Dadurch wird der Builder (siehe Unterabschnitt \ref{subsec:builder_implementation}) mit den entsprechenden Settings befüllt.
+
+Im Beispiel aus Programm \ref{prog:settings_provider} wird sichergestellt, dass in der Aufgabenansicht erfasst wird, wie oft eine Aufgabe dupliziert wird. Hierbei werden sowohl die Bezeichnung der Funktionalität als auch ein Text für die spätere Datenanreicherung angegeben.
+
+\begin{program}[H]
+\begin{CsCode}
+public class KISWinformsActivityTrackingSettingsProvider 
+    : IActivityTrackingSettingsProvider<IKISStandalonePresenter, IView>
+{
+    public void ProvideSettings(
+        IActivityTrackingStartSettingAccessor<IPresenter, IView> startSettingAccessor)
+    {
+        startSettingAccessor
+            .TrackView<AufgabenView>()
+            .GetUsage()
+            .TrackFunctionality("Duplizieren", "Aufgabe dupliziert")
+            .ApplySetting();
+    }
+}
+\end{CsCode}
+\caption{Bereitstellung der Tracking-Konfiguration.}
+\label{prog:settings_provider}
+\end{program}
+
+\subsection{Emittelung der Konfiguration}
+
+
 % Assemblies Referenzieren
 % Assembly Resolver Refernzieren
 % Reflection Referenzieren
 % Nullreferenz Types Referenzieren
 
 \subsection{Fluent API mit Builder}
+\label{subsec:builder_implementation}
 %Beispiel Settings
 %Beispiel Builder
 %Beispiel Fluent API in Anwendung erwähnen

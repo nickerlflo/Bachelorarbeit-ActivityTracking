@@ -1,0 +1,35 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{./lib/hgb-listings-override}
+
+\RequirePackage{xcolor}
+\RequirePackage{listingsutf8}
+
+\expandafter\let\csname CsCode\endcsname\relax
+\expandafter\let\csname endCsCode\endcsname\relax
+\expandafter\let\csname CsCode@\endcsname\relax
+
+\lstdefinestyle{VSCodeCSharp}{
+    language=[Sharp]C,
+    inputencoding=utf8,
+    extendedchars=true,
+    basicstyle=\ttfamily\small,          % normal text size
+    keywordstyle=\color{blue!80!black}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{red!70!black},
+    identifierstyle=\color{black},
+    numberstyle=\tiny\color{gray!50},
+    numbers=left,
+    stepnumber=1,
+    numbersep=6pt,
+    backgroundcolor=\color{white},
+    frame=single,
+    tabsize=4,
+    breaklines=true,
+    showstringspaces=false,
+    escapeinside={/+}{+/},
+}
+
+% Neue Umgebung
+\lstnewenvironment{CsCode}[1][]
+{\lstset{style=VSCodeCSharp, #1}}
+{}
