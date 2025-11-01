@@ -125,7 +125,7 @@ public interface IConfigurationStartSettingProvider<StartSettingType>
     StartSettingType GetActivityTrackingConfigurationStartSetting();
 }
 \end{CsCode}
-\caption{Schnittstellen der Builder in Zusammenhang mit der Fluent API}
+\caption{Schnittstellen der Builder in Zusammenhang mit der Fluent API.}
 \label{prog:configuration_builder_interfaces}
 \end{program}
 
@@ -162,7 +162,7 @@ internal record ActionTriggerSetting<TContext>(
     }
 }
 \end{CsCode}
-\caption{Beispiel für Settings und Accessoren}
+\caption{Beispiel für Settings und Accessoren.}
 \label{prog:example_setting_with_accessor}
 \end{program}
 
@@ -183,7 +183,7 @@ protected override Task<TrackingMissionData> BuildTrackingMissionAsyn(
             }
             throw new NotSupportedException(...);}).ToList()));
 \end{CsCode}
-\caption{Beispiel für die Verarbeitung von Settings zu Tracking-Aufträgen}
+\caption{Beispiel für die Verarbeitung von Settings zu Tracking-Aufträgen.}
 \label{prog:example_processing_of_settings}
 \end{program}
 
@@ -227,7 +227,7 @@ public abstract class ActivityTrackingActionProviderTemplateBase : IActivityTrac
     protected abstract string GetContextInfo(object? context);
 }
 \end{CsCode}
-\caption{Basis Template für Aktionen}
+\caption{Basis Template für Aktionen.}
 \label{prog:base_template_actions}
 \end{program}
 
@@ -274,7 +274,7 @@ private IList<Type> GetActionIdentifiersForActionProvider(
             .ToList();
 }
 \end{CsCode}
-\caption{Tracking Provider Registierung Entscheidungsgrundlage}
+\caption{Tracking Provider Registierung Entscheidungsgrundlage.}
 \label{prog:registration_code_snipped}
 \end{program}
 
@@ -301,7 +301,7 @@ public async Task PushDataAsync(IActivityTrackingPayload activityTrackingPayload
     });
 }
 \end{CsCode}
-\caption{Datenverarbeitung in der Filterkette}
+\caption{Datenverarbeitung in der Filterkette.}
 \label{prog:data_processing_chaining}
 \end{program}
 
@@ -334,7 +334,7 @@ public virtual bool Equals(ExtractionMissionMetricDataEntry? other) => ...;
 public override int GetHashCode() => ...;
 }
 \end{CsCode}
-\caption{Extraktionsauftragseintrag für Metriken}
+\caption{Extraktionsauftragseintrag für Metriken.}
 \label{prog:data_processing_task}
 \end{program}
 
@@ -369,26 +369,118 @@ protected override Task ExtractActivityTrackingActionAsync(
 \label{prog:data_extractor_example}
 \end{program}
 
-Zunächst wird nach einem Auftrag gesucht, der mit der eingehenden Aktion übereinstimmt. Wird ein solcher Auftrag gefunden, wird die Aktion weiterverarbeitet. Wie im Konzept \ref{sec:data_collection_concept} beschrieben, wird dabei zunächst geprüft, ob bereits gespeicherte, passende Daten vorhanden sind. Falls dies der Fall ist, werden die neuen Informationen mit den bestehenden Daten aggregiert. Wird im Beispiel etwa eine Ansicht mehrfach geöffnet, existiert beim Auslesen der Daten nur ein Eintrag, der zusätzlich die Anzahl der Aufrufe dieser Ansicht enthält.
+Zunächst wird nach einem Auftrag gesucht, der mit der eingehenden Aktion übereinstimmt. Wird ein solcher Auftrag gefunden, wird die Aktion weiterverarbeitet. Wie im Konzept \ref{sec:data_collection_concept} beschrieben, wird dabei zunächst geprüft, ob bereits gespeicherte, passende Daten vorhanden sind. Falls dies der Fall ist, werden die neuen Informationen mit den bestehenden Daten aggregiert. Wird im Beispiel etwa eine Ansicht mehrfach geöffnet, existiert beim Auslesen der Daten nur ein Eintrag, der die Anzahl der Aufrufe dieser Ansicht enthält. Für sonstige Daten, die auf Aktionen basieren oder eigenständig publiziert werden, existiert eine ähnliche Methode. Diese führt die Filterung jedoch auf Grundlage einer referenzierten Aktion oder anderer Kriterien durch. Die eigentliche Umsetzung, insbesondere die Verwendung der Methode ReplaceExistingExtraction, wird dabei beibehalten.
 
-Für sonstige Daten, die auf Aktionen basieren oder eigenständig publiziert werden, existiert eine ähnliche Methode. Diese führt die Filterung jedoch auf Grundlage einer referenzierten Aktion oder anderer Kriterien durch. Die eigentliche Umsetzung, insbesondere die Verwendung der Methode ReplaceExistingExtraction, wird dabei beibehalten.
-
-\section{Integration WPF}
+\section{Integration des Tracking Frameworks}
 \label{sec:integration_wpf_impl}
+Um das Framework zu integrieren muss das Framework in der Anwendung Initialisert werden und die Provider sowie Konfiguration in den verwendeten Projekten bereitgestellt werden. Wie dies umgesetzt wurde wird diesem Abschnitt beschrieben.
 
-\subsection{Schritt zur Integration}
-%MVVM Refernzieren
-%Erweiterungen Referenzieren
+\subsection{Initialisierung des Tracking Frameworks}
+Um das Framework zu initialisieren, werden die Komponenten zunächst in einen Dependency Injection Container eingefügt. 
 
-\subsection{Beispiel Aktionen Provider}
+\begin{program}[H]
+\begin{CsCode}
+public sealed class RZLActivityTrackingSystemConfiguration 
+    : IActivityTrackingSystemConfiguration, IBootable{
+    public IAssemblyProvider AssemblyProvider { get; private init; }
+    public Func<Task<bool>> IsTrackingEnabledAsync { get; private init; }
+    public Func<IList<IActivityTrackingExtractionData>, Task<object>> ConvertToResultDataAsync 
+        => ActivityTrackingResultConversionHelper.SerializeToJson;
+    public Func<object, Task<bool>> TrackingDataPublishAsyncChannel => 
+        (input) => { Debug.WriteLine(input); return Task.FromResult(true); };
+    public Action<ActivityTrackingException> ExceptionHandler { get; set; } = 
+        ex => #if DEBUG throw ex; #endif
+    ...
+    public RZLActivityTrackingSystemConfiguration(
+        IActivityTrackingMainManager mainManager,
+        IUsabilityLogAgreementService usabilityLogAgreementService,
+        IMVVMConfiguration mvvmConfiguration){
+        _mainManager = mainManager;
+        AssemblyProvider = new RZLActivityTrackingAssemblyProvider();
+        IsTrackingEnabledAsync = usabilityLogAgreementService
+                                    .IsRZLAllowedToSendUsablilityInformationFromUserAsync;
+        usabilityLogAgreementService.OnLoggingAgreementChanged += 
+                            (_, _) => _mainManager.NotifyIsTrackingEnabledChanged();
+    }
+
+    public async ValueTask ExecuteAsync(IBootContext bootContext, IBootParameter _)
+        => await _mainManager.InitializeAsync(this);
+}
+\end{CsCode}
+\caption{Systemkonfiguration und Systeminitialisierung.}
+\label{prog:system_initialization_and_configuration}
+\end{program}
+
+Die Systemkonfiguration ist eine besondere Abhängigkeit und stellt eine Methode bereit, die zu einem bestimmten Zeitpunkt im Bootprozess aufgerufen wird. Dieser Zeitpunkt wird durch die Abhängigkeiten bestimmt. Die Methode initialisiert anschließend das Tracking-System über den zentralen Hauptmanager. Die Konfiguration liefert dabei die benötigten Informationen. Die Systemkonfiguration wird im Programm \ref{prog:system_initialization_and_configuration} dargestellt.
+
+Die Abhängigkeit IMVVMConfiguration im Konstruktor wird zwar nicht direkt verwendet, hat jedoch die Aufgabe, die Konfiguration erst zum richtigen Zeitpunkt zu initialisieren, wie bereits erwähnt. Die Eigenschaften sind im Programm beispielhaft implementiert und können je nach Anwendung variieren. Im Testprogramm werden die Daten daher in JSON umgewandelt und in der Konsole ausgegeben. In einem produktiven System würden die Daten über einen Service an einen Server übermittelt.
+
+Exceptions werden im Testprogramm einfach weitergeworfen, um den Stillstand sichtbar zu machen, in einem Echt-System wäre an dieser Stelle Logging vorgesehen. Ob Tracking durchgeführt werden kann, wird in diesem System bereits über einen Service geprüft, der über das Programm angesteuert werden kann.
+
+Der AssemblyProvider ist je nach Anwendung unterschiedlich und gibt an, welche Projekte für die Konfiguration, Filter und Extraktoren berücksichtigt werden sollen.
+
+\subsection{Integration Windows Forms}
+Wenn die Anwendung eine Systemkonfiguration bereitstellt, fehlen nur mehr die Provider die entsprechenden Daten bereitstellen. Diese müssen je System implementiert werden und mit den Ansichten Verknüft werden. In diesem Abschnitt wird erläutert, wie dies für Windows Forms umgesetzt wurde. 
+
+\subsubsection{Integration der Provider}
+In Windows Forms werden die Provider als Embedded Presenter (siehe Unterabschnitt \ref{subsec:embedded_presenter}) bereitgestellt. Dazu wird in einer der Basisklassen in der Methode, in der solche Extensions hinzugefügt werden, die in Programm \ref{prog:add_provider_to_winforms} gezeigte Methode aufgerufen und die Provider hinzugefügt.
+
+\begin{program}[H]
+\begin{CsCode}
+public static IList<KISEmbeddedPresenterBase> GetEmbeddedPresenterForActivityTracking(
+    this KISStandalonePresenterBase standalonePresenter){
+    var activityTrackingMainManager = standalonePresenter.Container
+                                            .GetService<IActivityTrackingMainManager>();
+
+    if (activityTrackingMainManager is null || !activityTrackingMainManager.IsInitialized)
+        return [];
+
+    return[standalonePresenter.GetEmbeddedPresenter<LoadTimeDataProviderEmbeddedPresenter>(standalonePresenter, false),
+           standalonePresenter.GetEmbeddedPresenter<PresenterActionProviderEmbeddedPresenter>(standalonePresenter, false),
+           ...];
+}
+\end{CsCode}
+\caption{Bereitstellung der Provider unter Windows Forms.}
+\label{prog:add_provider_to_winforms}
+\end{program}
+
+Die Provider werden jedoch nur dann hinzugefügt, wenn das Tracking-System aktiv ist, um die Laufzeit beim Registrieren zu reduzieren. Dieser Schritt ist daher nur notwendig, um die Performance zu verbessern.
+
+\subsection{Integration WPF}
+In WPF werden die Provider über Presenter-Extensions (siehe Unterabschnitt \ref{subsec:presenter_extensions}) bereitgestellt. Diese Extensions können in der MVVM-Konfiguration, deren Zusammenhang mit den Presenter-Extensions im Unterabschnitt erklärt wird, konfiguriert werden. Dazu wird die im Programm \ref{prog:add_provider_to_wpf} dargestellte Methode verwendet. Diese fügt die Erweiterungen, wie auch bei Windows Forms, nur hinzu, wenn das Tracking-System tatsächlich aktiv ist.
+
+Zur Ermittlung des Initialized-Events wird zusätzlich eine ViewModel-Extension (siehe Unterabschnitt \ref{subsec:viewmodel_extensions}) benötigt. Diese ist die einzige Extension, die direkt dem Basis-ViewModel hinzugefügt werden muss, damit sie für alle weiteren ViewModels verfügbar ist und beim Erzeugen sowie Hinzufügen der Provider genutzt werden kann.
+
+\begin{program}[H]
+\begin{CsCode}
+public static PresenterExtensionConfig<RZLViewModelBase> CreatePresenterExtensionConfig() =>
+    new PresenterExtensionConfig<RZLViewModelBase>((p, vm) => {
+       var dataCollectionEntryPoint = MVVMApplication.Container.GetService<IActivityTrackingDataCollectionCollaborationEntryPoint>();
+       var activityTrackingMainManager = MVVMApplication.Container.GetService<IActivityTrackingMainManager>();
+       var viewModelInitializedEventVMX = vm.GetViewModelExtension<ViewModelInitializedEventVMX>();
+
+       if (activityTrackingMainManager is null || !activityTrackingMainManager.IsInitialized ||
+           dataCollectionEntryPoint is null || viewModelInitializedEventVMX is null)
+           return [];
+
+       IActivityTrackingProviderPresenterExtension[] presentersExtensions = [
+           new PropertyDataProviderPX(vm, p.View, dataCollectionEntryPoint),
+               new LoadTimeDataProviderPX(viewModelInitializedEventVMX, vm, p.View, dataCollectionEntryPoint),
+               new ViewModelActionProviderPX(viewModelInitializedEventVMX, vm, p.View, dataCollectionEntryPoint),
+               ...
+       ];
+       presentersExtensions.ForEach(pe => pe.Initialize());
+       return presentersExtensions;
+   });
+\end{CsCode}
+\caption{Bereitstellung der Provider unter WPF}
+\label{prog:add_provider_to_wpf}
+\end{program}
+
+\subsection{Erstellen eines spezifischen Provider}
+
+
 %Eventsystem Referenzieren
-
-\section{Integration Windows Forms}
-\label{sec:integration_winforms_impl}
-
-\subsection{Schritt zur Integration}
 %Aufgabendelegation Referenzieren
 
-\subsection{Beispiel Daten Provider}
-%Referenz auf Reflection
 
