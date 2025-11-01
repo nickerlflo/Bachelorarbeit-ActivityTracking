@@ -37,6 +37,7 @@ public class KISWinformsActivityTrackingSettingsProvider
 \end{program}
 
 \subsection{Ermittlung der Konfiguration}
+\label{subsec:investigation_of_configuration}
 
 Die zuvor beschriebene Konfiguration wird im dafür zuständigen Manager erzeugt, ähnlich wie der Direktor im Builder-Muster \cite{gamma1995design}. Die dafür verwendete Methode ist in Programm \ref{prog:configuration_building} dargestellt.
 
@@ -277,15 +278,100 @@ private IList<Type> GetActionIdentifiersForActionProvider(
 \label{prog:registration_code_snipped}
 \end{program}
 
-
 \section{Filterung und Extraktion}
 \label{sec:data_extraction_impl}
-
-%Asynchrone Programmierung Referenzieren
+Im Abschnitt \ref{sec:data_extraction_concept} wurde bereits erläutert, dass die zuvor ermittelten Daten in einer asynchronen Umgebung weiterverarbeitet werden müssen, um sie präzise an die Anforderungen der Konfiguration anzupassen. Wie diese Verarbeitung umgesetzt wurde, wird im folgenden Abschnitt beschrieben.
 
 \subsection{Verarbeitungskette Ablauf}
+Die eingehenden Daten werden direkt vom Manager für Datenverarbeitung an eine initialisierte Verarbeitungskette weitergegeben. Diese nimmt die Daten entgegen und erzeugt für jedes Element einen Task, der in eine Warteschlange eingereiht wird. Die Warteschlange wird anschließend von Hintergrund-Threads asynchron abgearbeitet. Dabei kommt der taskbasierte Ansatz zum Einsatz, der im Unterabschnitt \ref{subsec:async} beschrieben ist.
 
-\subsection{Extraktion Beispiel}
+Das Hinzufügen von Aufgaben wird im Programm \ref{prog:data_processing_chaining} exemplarisch und in vereinfachter Form dargestellt. Treffen die eingehenden Daten, entweder Aktionen oder sonstige Informationen, die in der Methode PushDataAsync als Payload übergeben werden, nicht auf einen gültigen Filter, so werden sie nicht weiterverarbeitet. Die Filter werden sequentiell durchlaufen, und sobald einer der Filter anschlägt, wird die entsprechende Payload verworfen. Wird die Payload hingegen nicht herausgefiltert, durchläuft sie alle Extraktoren, die relevante Daten aus ihr extrahieren können.
+
+Das Filtern der Daten erfolgt über die Methode ApplyFilterAsync, während die Methode ExtractDataAsync für das eigentliche Extrahieren der Informationen verantwortlich ist.
+
+\begin{program}[H]
+\begin{CsCode}
+public async Task PushDataAsync(IActivityTrackingPayload activityTrackingPayload){
+    await _taskQueue.Run(async () =>
+    {
+        var filteredPayload = await ApplyFiltersAsync(activityTrackingPayload);
+
+        if (filteredPayload is not null)
+            await ExtractDataAsync(filteredPayload);
+    });
+}
+\end{CsCode}
+\caption{Datenverarbeitung in der Filterkette}
+\label{prog:data_processing_chaining}
+\end{program}
+
+Wie bereits erwähnt, ist das dargestellte Programm stark vereinfacht. In der tatsächlichen Implementierung existieren zusätzliche Codeabschnitte, die unter anderem Locking-Mechanismen und Fehlerbehandlung übernehmen. Dadurch wird sichergestellt, dass ein externer Filter oder Extraktor die Ausführung anderer Filter und Extraktoren nicht beeinflussen kann.
+
+Die Filter und Extraktoren können, ähnlich wie bei der Konfiguration (siehe Unterabschnitt \ref{subsec:investigation_of_configuration}), in den einzelnen Assemblies bereitgestellt werden. Sie werden anschließend vom für die Extraktion zuständigen Manager in die Filterkette eingefügt.
+
+\subsection{Extraktion der Daten}
+Während Filter die Payload erhalten und Basis dieser Daten entscheiden, ob die Payload weiter verareitet werden soll, werden bei der Extraktion die Daten auf basis eines Trackingauftrags verarbeitet. Wie diese Verabreitung funktioniert, wird in diesem Abschnitt exemplarisch dargestellt.
+
+\subsubsection{Trackingauftrag}
+Ein Extraktionsauftrag enthält, ähnlich wie ein Trackingauftrag, Informationen über Aktionen, Metadaten zum Ergebnisobjekt sowie weitere Filterkriterien. Während Trackingaufträge lediglich auf Basis der Kategorie, die über den Aktions-Identifier bestimmt wird, ausgeführt werden, berücksichtigt die Extraktion zusätzlich den Inhalt des Aktions-Identifiers. Dabei wird überprüft, ob der Identifier des Auftrags mit dem Aktions-Identifier der bereitgestellten Aktion kompatibel ist.
+
+Im Programm \ref{prog:data_processing_task} wird ein Beispiel für ein Objekt eines Extraktionsauftrags dargestellt.
+Die Kompatibilität eines Identifiers mit einem anderen bedeutet, dass es allgemeinere Identifier gibt, die den Inhalt einer Aktion weniger spezifisch beschreiben. Ein allgemeiner Identifier ist somit mit einem spezifischeren Identifier kompatibel, wodurch die entsprechende Aktion weiterverarbeitet wird.
+
+Bei sonstigen Daten, die keine Aktion darstellen, existiert kein Identifier. Diese Daten werden ausschließlich auf Grundlage weiterer Filterkriterien verarbeitet. Bestimmte sonstige Daten können jedoch ebenfalls einen Identifier besitzen, sofern sie einer Aktion zugeordnet sind.
+
+\begin{program}[H]
+\begin{CsCode}
+public record ExtractionMissionMetricDataEntry(
+ContextType ContextType,
+IActivityTrackingActionIdentifier? ActionIdentifier,
+Type? Context,
+MetricType MetricType) : IActivityTrackingExtractionMissionDataEntry
+{
+public TrackingSubject TrackingSubject => TrackingSubject.Metrics;
+public bool IsMoreSpecificThan(IActivityTrackingExtractionMissionDataEntry other) => ...;
+public virtual bool Equals(ExtractionMissionMetricDataEntry? other) => ...;
+public override int GetHashCode() => ...;
+}
+\end{CsCode}
+\caption{Extraktionsauftragseintrag für Metriken}
+\label{prog:data_processing_task}
+\end{program}
+
+\subsubsection{Daten Extraktion}
+Auf Basis des beschriebenen Auftrags kann ein Extraktor entscheiden, ob und wie die vorliegenden Daten verarbeitet werden. Wie auch bei den Filtern existieren hierfür Basisklassen, welche die Verarbeitung durch Hilfsmethoden vereinfachen. Die eigentliche Logik befindet sich jedoch in den spezifischen Extraktoren selbst. Eine Methode zur Extraktion von Aktionen von einem dieser Extraktoren ist in Programm \ref{prog:data_extractor_example} dargestellt.
+
+\begin{program}[H]
+\begin{CsCode}
+protected override Task ExtractActivityTrackingActionAsync(
+    IActivityTrackingAction action, CancellationToken cancellationToken)
+{
+    if (TryGetMissionEntriesForActionWithContext<ExtractionMissionMetricDataEntry>(
+        action, TrackingSubject.Metrics, 
+        [typeof(ViewAction), typeof(PresentationModelAction)],
+        mde => mde.MetricType == MetricType.ViewUsage, out var entries))
+    {
+        ...
+        ReplaceExistingExtraction<ExtractionViewUsageData>(existingExtraction =>
+        {
+            return new ExtractionViewUsageData(
+                  entries.First().ContextType,
+                  action.ActionIdentifier.Context!,
+                  action.ContextInfo!,
+                  (existingExtraction?.ViewUsageCount ?? 0) + 1);
+        },
+        ed => ed.Context == action.ActionIdentifier.Context);
+    }
+    return Task.CompletedTask;
+}
+\end{CsCode}
+\caption{Daten Extraktion für Metriken}
+\label{prog:data_extractor_example}
+\end{program}
+
+Zunächst wird nach einem Auftrag gesucht, der mit der eingehenden Aktion übereinstimmt. Wird ein solcher Auftrag gefunden, wird die Aktion weiterverarbeitet. Wie im Konzept \ref{sec:data_collection_concept} beschrieben, wird dabei zunächst geprüft, ob bereits gespeicherte, passende Daten vorhanden sind. Falls dies der Fall ist, werden die neuen Informationen mit den bestehenden Daten aggregiert. Wird im Beispiel etwa eine Ansicht mehrfach geöffnet, existiert beim Auslesen der Daten nur ein Eintrag, der zusätzlich die Anzahl der Aufrufe dieser Ansicht enthält.
+
+Für sonstige Daten, die auf Aktionen basieren oder eigenständig publiziert werden, existiert eine ähnliche Methode. Diese führt die Filterung jedoch auf Grundlage einer referenzierten Aktion oder anderer Kriterien durch. Die eigentliche Umsetzung, insbesondere die Verwendung der Methode ReplaceExistingExtraction, wird dabei beibehalten.
 
 \section{Integration WPF}
 \label{sec:integration_wpf_impl}
