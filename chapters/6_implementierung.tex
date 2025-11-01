@@ -36,19 +36,155 @@ public class KISWinformsActivityTrackingSettingsProvider
 \label{prog:settings_provider}
 \end{program}
 
-\subsection{Emittelung der Konfiguration}
+\subsection{Ermittlung der Konfiguration}
 
+Die zuvor beschriebene Konfiguration wird im dafür zuständigen Manager erzeugt, ähnlich wie der Direktor im Builder-Muster \cite{gamma1995design}. Die dafür verwendete Methode ist in Programm \ref{prog:configuration_building} dargestellt.
 
-% Assemblies Referenzieren
-% Assembly Resolver Refernzieren
-% Reflection Referenzieren
-% Nullreferenz Types Referenzieren
+\begin{program}[H]
+\begin{CsCode}
+private async Task<bool> BuildConfigurationAsync(IAssemblyProvider assemblyProvider)
+{
+    try
+    {
+        var settingsProviderTypes = AssemblyRegisterProvider
+                .LoadTypesFromBaseTypeOrInterface(
+                    typeof(IActivityTrackingSettingsProvider<,>), 
+                    assemblyProvider.Assemblies)
+                .Where(t => t.IsClass).ToList();
+
+        foreach (var settingsProviderType in settingsProviderTypes)
+        {
+            var interfaceType = settingsProviderType
+                .GetInterfaces()
+                .First(i => i.IsGenericType && 
+                            i.GetGenericTypeDefinition() == typeof(
+                                IActivityTrackingSettingsProvider<,>));
+
+            var configurationBuilder = FindOrCreateBuilder(interfaceType);
+            try
+            {
+                InvokeProvideSettings(
+                    interfaceType, settingsProviderType, configurationBuilder);
+            } catch (Exception ex){...}
+        }
+        foreach (var builder in _activityTrackingConfigurationBuilder)
+            await builder.BuildAsync().ConfigureAwait(false);
+    } catch (Exception ex){...}
+    return true;
+}
+\end{CsCode}
+\caption{Bereitstellung der Tracking-Konfiguration.}
+\label{prog:configuration_building}
+\end{program}
+
+Die Methode BuildConfigurationAsync ermittelt zunächst die Typen, die als Provider für Builder Einstellungen fungieren. Hierzu wird der AssemblyRegisterProvider verwendet, welcher das Gegenstück zum AssemblyRegisterResolver (siehe Unterabschnitt \ref{sec:assembly_resolver}) darstellt. Durch einen Filter wird sichergestellt, dass nur Klassen berücksichtigt werden, da in .NET neben Klassen auch Strukturen und andere Datentypen existieren.
+
+Anschließend wird für jeden SettingsProvider der passende Builder erzeugt. Dabei verwendet der Builder dieselben generischen Parameter wie der Provider, sodass die Einstellungen später korrekt verarbeitet werden können. Die Methode FindOrCreateBuilder sucht oder erstellt bei Bedarf einen Builder, um Duplikate in der Konfiguration zu vermeiden und die Effizienz zu steigern, indem Builder zwischengespeichert werden.
+
+Daraufhin werden die Provider instanziiert und die Methode ProvideSettings mit einer Starteinstellung aufgerufen, die anschließend weiter spezifiziert werden kann. Diese Starteinstellung wird von dem Builder bereitgestellt, der die Wurzel des Builder Baums bildet (siehe Unterabschnitt \ref{subsec:builder_functionality_usage}). Der Aufruf erfolgt über die Methode InvokeProvideSettings, die mithilfe von Reflection arbeitet (siehe Unterabschnitt \ref{subsec:reflection}).
+
+Nachdem die ermittelten Einstellung den entsprechenden Buildern zugewiesen wurden, erfolgt der eigentliche Aufbau der Konfiguration über die Builder. Die fertige Konfiguration kann anschließend über diese Builder abgerufen werden. Im konkreten Fall handelt es sich dabei um zwei Methoden, die zum einen den Tracking-Auftrag und zum anderen den Extraktionsauftrag liefern. Diese werden im Unterabschnitt \ref{subsec:communication_between_coponents} näher beschrieben.
 
 \subsection{Fluent API mit Builder}
 \label{subsec:builder_implementation}
-%Beispiel Settings
-%Beispiel Builder
-%Beispiel Fluent API in Anwendung erwähnen
+
+Die Fluent API \cite{Fowler2005FluentInterface}, auch bekannt als Methodenverkettungsansatz, stellt eine Möglichkeit dar, eine domänenspezifische Sprache zu entwickeln, die beispielsweise eine Konfiguration lesbarer gestaltet, indem sie sich wie ein natürlicher Satz formulieren lässt. Die konkrete Anwendung dieser Fluent API wird in Kapitel \ref{cha:auswertung} näher erläutert.
+
+Die Umsetzung in dieser Bachelorarbeit erfolgt mithilfe von Einstellungen (Settings), Buildern und Zugriffstypen für Einstellungen (Accessoren). Dabei tragen insbesondere die Settings und Accessoren maßgeblich zur Bildung der Fluent API bei, wie in diesem Unterabschnitt näher beschrieben wird.
+
+\subsubsection{Builder}
+
+Builder sind im Zusammenhang mit der Fluent API dafür verantwortlich, das Start-Setting bereitzustellen und somit die Verbindung zwischen dem Builder und den fertigen Settings herzustellen, die später über die ApplySetting-Methode angewendet werden. Beim Übergang zwischen den einzelnen Buildern werden aus Settings wiederum neue Builder erzeugt, die über eine zu Beginn erzeugte Referenz mit dem Hauptbuilder verknüpft werden.
+
+Je nach Position im Konfigurationsbaum implementieren die verschiedenen Builder die in Programm \ref{prog:configuration_builder_interfaces} dargestellten Schnittstellen:
+
+\begin{itemize}
+\item \textbf{IConfigurationBuilder:} Beschreibt die grundlegenden Eigenschaften eines Builders.
+\item \textbf{IRegisterableConfigurationBuilder:} Wird von Buildern implementiert, die ab der zweiten Ebene im Baum liegen und sich bei ihrem Vorgänger registrieren können.
+\item \textbf{IConfigurationSettingHolder:} Repräsentiert die Blätter des Konfigurationsbaums, denen fertige Einstellungen hinzugefügt werden können.
+\item \textbf{IConfigurationStartSettingProvider:} Stellt die Wurzel des Baumes dar und liefert das erste Setting, auf dessen Basis weitere Settings erzeugt werden. Diese Schnittstelle ist notwendig, da jedes Setting mit einem Builder verknüpft werden muss, um den Aufbau des Builder-Baumes zu ermöglichen.
+\end{itemize}
+
+\begin{program}[H]
+\begin{CsCode}
+public interface IConfigurationBuilder : IAsyncDisposable {
+    bool IsBuilt { get; }
+    Task BuildAsync();
+}
+public interface IRegisterableConfigurationBuilder<TBuilder> : IConfigurationBuilder
+    where TBuilder : IConfigurationBuilder {
+    void Register(IConfigurationBuilderHolder<TBuilder> predecessorBuilder);
+}
+public interface IConfiguationSettingHolder<TBuilder> : IConfigurationBuilder
+    where TBuilder : IConfigurationBuilder {
+    public void AddSetting(ICompletedConfigurationSetting<TBuilder> setting);
+}
+public interface IConfigurationStartSettingProvider<StartSettingType>
+    where StartSettingType : IConfigurationSettingAccessor {
+    StartSettingType GetActivityTrackingConfigurationStartSetting();
+}
+\end{CsCode}
+\caption{Schnittstellen der Builder in Zusammenhang mit der Fluent API}
+\label{prog:configuration_builder_interfaces}
+\end{program}
+
+\subsubsection{Settings und Accessoren}
+Einstellungen müssen konfiguriert und gespeichert werden. Dazu existieren Settings, die konkrete, unveränderbare Objekte darstellen. Aus diesen können mithilfe von Accessoren weitere Einstellungen abgeleitet werden. Die Settings bilden somit ähnlich wie beim Prototyp-Muster \cite{gamma1995design} die Grundlage für weitere Konfigurationen, indem sie kopiert und erweitert werden.
+
+Accessoren stellen die Schnittstelle dar, über die die für den Anwender sichtbare Fluent API bereitgestellt wird. Die Settings hingegen implementieren die zugehörigen Methoden und enthalten die entsprechenden, miteinander verknüpften Daten, die beim Aufbau der Konfiguration ausgelesen werden.
+
+Programm \ref{prog:example_setting_with_accessor} zeigt ein Beispiel für den Aufbau von Accessoren und Settings. Das Setting enthält Informationen darüber, wann der weiter konfigurierte Wert einer Ansicht oder eines Präsentationsmodells ausgelesen wird. Die Eigenschaften werden dabei mithilfe eines Record-Typs \cite{microsoft_csharp_records} unter Berücksichtigung von nullable bzw. Optionalen Eigenschaften (siehe Unterabschnitt \ref{subsec:csharp_null_reference_types}) bereitgestellt.
+
+Der Zugriffstyp IActionTriggerSettingAccessor definiert, wie das Setting weiter ausgebaut werden kann. In diesem Fall kann eine Property aus dem Kontext gewählt werden. Das daraus resultierende Setting ist, wie in der Schnittstelle beschrieben, ein vollständiges Setting, das mithilfe der ApplySetting-Methode aus dem Interface IConfigurationEndSettingAccessor dem TargetConfigurationBuilder hinzugefügt wird.
+
+\begin{program}[H]
+\begin{CsCode}
+public interface IActionTriggerSettingAccessor<TContext> : IConfigurationSettingAccessor{
+    IConfigurationEndSettingAccessor SelectProperty<TValue, TResult>(
+        Expression<Func<TContext, TValue>> propertySelector,
+        Func<TValue, TResult>? propertyConverter = null,
+        string? description = null);
+}
+internal record ActionTriggerSetting<TContext>(
+    IActivityTrackingConfigurationBuilder TargetConfigurationBuilder,
+    ContextType ContextType,
+    IActivityTrackingActionIdentifier Action) : IActionTriggerSettingAccessor<TContext>,IConfigurationSetting<IActivityTrackingConfigurationBuilder>
+    {
+    public IConfigurationEndSettingAccessor SelectProperty<TValue, TResult>(
+        Expression<Func<TContext, TValue>> propertySelector,
+        Func<TValue, TResult>? propertyConverter = null,
+        string? description = null){
+        var propertyDataProviderParameter = new PropertyDataProviderParameter(propertySelector, propertyConverter,description);
+        return new DataSelectionSetting(TargetConfigurationBuilder, ContextType, 
+                                        typeof(TContext), Action,
+                                        propertyDataProviderParameter);
+    }
+}
+\end{CsCode}
+\caption{Beispiel für Settings und Accessoren}
+\label{prog:example_setting_with_accessor}
+\end{program}
+
+\subsection{Erzeugen der Aufträge für das Datensammeln und Extrahieren}
+Die gesammelten Einstellungen werden, im Builder mit der Schnittstelle IConfigurationSettingHolder zusammengeführt und beim Aufruf der Build-Methode verarbeitet. Die Builder in den darunterliegenden Schichten sind für die Delegation dieses Aufrufs sowie für die Gruppierung der untergeordneten Builder verantwortlich. Dadurch übernehmen die Blätter des Konfigurationsbaums die eigentliche Arbeit beim Aufbau der Konfiguration. Die Verarbeitung der Settings wird anhand eines Beispiels im Programm \ref{prog:example_processing_of_settings} für Tracking-Aufträge erläutert. Die Vorgehensweise für Extraktionsaufträge erfolgt analog. Wie im Programm dargestellt, leitet die Build-Methode die gesammelten Settings an die Methode BuildTrackingMissionAsync weiter. Diese Methode erzeugt für jeden Setting-Typ einen entsprechenden Auftrag für das Tracking.
+
+\begin{program}[H]
+\begin{CsCode}
+protected override Task<TrackingMissionData> BuildTrackingMissionAsyn(
+    IReadOnlyList<ICompletedConfigurationSetting<IActivityTrackingConfigurationBuilder>> appliedSettings) =>
+        Task.FromResult(new TrackingMissionData(appliedSettings.Select(cs => {
+            if (cs is DataSelectionSetting dataSelectionSetting)
+            {
+                return new TrackingMissionDataEntry(dataSelectionSetting.Context,
+                                                    dataSelectionSetting.Action,
+                                                    typeof(PropertyDataProviderTemplate),
+                                                    dataSelectionSetting.PropertyParameter);
+            }
+            throw new NotSupportedException(...);}).ToList()));
+\end{CsCode}
+\caption{Beispiel für die Verarbeitung von Settings zu Tracking-Aufträgen}
+\label{prog:example_processing_of_settings}
+\end{program}
 
 \section{Daten- und Aktionsermittlung}
 \label{sec:data_collection_impl}

@@ -19,7 +19,8 @@ C\# wird, wie auch andere Sprachen desselben Ökosystems, zunächst in IL (Inter
 
 Für die Ausführung von .NET-Programmen wird somit die CLR benötigt, die Bestandteil der .NET Runtime Environment bzw. des .NET SDK ist. Die Assemblies (siehe Unterabschnitt \ref{subsec:assemblies}) werden üblicherweise als \texttt{.dll}- oder \texttt{.exe}-Dateien abgelegt, unterscheiden sich inhaltlich jedoch von C++ Programmen, die nativ kompiliert werden.
 
-\subsection{Nullable Reference Types}
+\subsection{Nullable Referenz Typen}
+\label{subsec:csharp_null_reference_types}
 Der bekannte Informatiker Tony Hoare bezeichnete die Einführung von \texttt{null} als seinen größten Fehler, da die dadurch verursachten Probleme enorm seien \cite{hoare_null_video}. Dieses Problem lässt sich bis zu einem gewissen Grad durch die sogenannten Nullable Reference Types \cite{microsoft-nullable-references} lösen. Der Compiler prüft hierbei, ob eine Variable den Wert \texttt{null} annehmen kann und falls dies der Fall ist, muss der Code explizit eine entsprechende Überprüfung vorsehen. Aufgrund der damit verbundenen Reduzierung von NullReferenceException-Fehlern wird dieses Konzept auch in dieser Arbeit verwendet. Entscheidend ist jedoch, dass die durch den Compiler entstehenden Warnings auf Errors umgestellt werden, um die Abdeckung aller entstandenen Nullszenarien zu garantieren.
 
 \subsection{Assemblies}
