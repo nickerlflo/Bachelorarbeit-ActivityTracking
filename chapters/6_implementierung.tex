@@ -478,9 +478,51 @@ public static PresenterExtensionConfig<RZLViewModelBase> CreatePresenterExtensio
 \end{program}
 
 \subsection{Erstellen eines spezifischen Provider}
+Anhand eines Beispiels soll gezeigt werden, wie ein spezifischer Provider erstellt wird. Für dieses Beispiel wurde ein Aktions-Provider für WPF herangezogen. Dieser wird im Programm \ref{prog:action_provider_wpf_example} dargestellt.
 
+Das gezeigte Programm implementiert einen Aktions-Provider, der die in einer Ansicht verwendeten Shortcuts ermittelt. Dazu implementiert der Provider das KeyboardActionProviderTemplate und wird mithilfe einer Adapter-Klasse zu einer IActivityTrackingProviderPresenterExtension. Der Provider bindet die vom Template bereitgestellten Handler an die entsprechenden Events, die beispielsweise über RoutedEvents (siehe Unterabschnitt \ref{subsec:WPF}) ausgelöst werden. Diese Events müssen dabei auf das richtige Handler-Format übertragen werden.
 
-%Eventsystem Referenzieren
-%Aufgabendelegation Referenzieren
+Der Provider übergibt dem Template außerdem die Schnittstelle zur Registrierung sowie die Objekte, die als gültiger Kontext für die Bereitstellung von Daten in Frage kommen. Für Shortcuts können in der Konfiguration daher sowohl das ViewModel als auch die View angegeben werden. Das Template übernimmt anschließend die weitere Verarbeitung und übermittelt die erfassten Informationen an das Tracking-Framework.
+
+\begin{program}[H]
+\begin{CsCode}
+internal sealed class KeyboardActionProviderPX : IActivityTrackingProviderPresenterExtension{
+    ... 
+    public void Initialize(){
+        if (_dataCollectionCollaborationEntryPoint is null)
+            return;
+
+        _keyboardActionProvider = new KeyboardActionProvider(_viewModel, _view, _dataCollectionCollaborationEntryPoint);
+        _keyboardActionProvider.Initialize();
+    }
+    private class KeyboardActionProvider : KeyboardActionProviderTemplate{
+        ...
+        private void KeyEventHandlerAdapter(object sender, KeyEventArgs args) => 
+            _keyEventHandler?.Invoke(sender, args);
+        private void ViewLeavedHandlerAdapter(object sender, RoutedEventArgs args) =>  
+            _viewLeavedHandler?.Invoke(sender, args);
+        protected override object[] GetContextObjects() => [_view, _viewModel];
+        protected override string GetContextInfo(object? context) => ...
+        protected override IActivityTrackingDataCollectionCollaborationEntryPoint 
+            GetDataCollectionEntryPoint() => _dataCollectionCollaborationEntryPoint;
+        protected override (string Key, bool SignalsLast)? GetKeyEventInfo(EventArgs args) 
+            => ...
+        protected override void RegisterShortcutEventHandler(EventHandler handler){
+            _keyEventHandler += handler;
+            _view.PreviewKeyUp += KeyEventHandlerAdapter;
+            _view.PreviewKeyDown += KeyEventHandlerAdapter;
+        }
+        protected override void UnregisterShortcutEventHandler(EventHandler handler) => ...
+        protected override void RegisterViewLeaved(EventHandler eventHandler){
+            _viewLeavedHandler += eventHandler;
+            _view.LostFocus += ViewLeavedHandlerAdapter;
+        }
+        protected override void UnregisterViewLeaved(EventHandler eventHandler) => ...
+    }
+}
+\end{CsCode}
+\caption{Provider für Aktionen WPF Beispiel.}
+\label{prog:action_provider_wpf_example}
+\end{program}
 
 
