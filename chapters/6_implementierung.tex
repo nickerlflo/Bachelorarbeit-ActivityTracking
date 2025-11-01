@@ -188,10 +188,95 @@ protected override Task<TrackingMissionData> BuildTrackingMissionAsyn(
 
 \section{Daten- und Aktionsermittlung}
 \label{sec:data_collection_impl}
+Im vorherigen Abschnitt wurde erläutert, wie die Aufträge mithilfe der Konfiguration erzeugt werden. In diesem Abschnitt wird näher beschrieben, wie diese Aufträge abgearbeitet werden und wie die einzelnen Komponenten zur Datenbeschaffung implementiert sind.
 
-\subsection{Aktion Provider Template}
+\subsection{Provider Template für Aktionen}
+Um Daten zu sammeln, müssen diese, wie bereits im Unterabschnitt \ref{sec:data_extraction_concept} beschrieben, von sogenannten Providern bereitgestellt werden. Damit ein Provider Daten liefern kann, muss er sich zunächst registrieren. Nach erfolgreicher Registrierung erhält er, abhängig vom jeweiligen Trackingauftrag, Zugriff auf einen Datenkanal, über den die gesammelten Daten zur weiteren Verarbeitung bereitgestellt werden können.
+
+Für die Implementierung dieser Provider werden im Framework Templates im Sinne des Template-Musters \cite{gamma1995design} verwendet. Diese Templates kommen sowohl für Aktionen als auch für andere Arten von Daten zum Einsatz. Da die Implementierung beider Varianten weitgehend identisch ist, wird in diesem Abschnitt das Basis-Template für Aktionen erläutert, das in Programm \ref{prog:base_template_actions} dargestellt ist. Dieses Template dient als Grundlage für aktionsspezifische Templates.
+
+\begin{program}[H]
+\begin{CsCode}
+public abstract class ActivityTrackingActionProviderTemplateBase : IActivityTrackingActionProvider{
+    public void Initialize(){
+        var dataCollectionEntryPoint = GetDataCollectionEntryPoint();
+        foreach (var context in GetContextObjects()){
+            if (dataCollectionEntryPoint.TryEstablishActionProviderCollaboration(
+                    this, context, out var publishChannel, out var suggestedIdentifiers))
+            {
+                ...
+            }
+        }
+        ...
+        InitializeCore();
+    }
+    public void Dispose(){
+        DisposeCore();
+        ...
+    }
+    public void CancelDataCollectionCollaboration() => Dispose();
+    protected void PublishAction(IActivityTrackingAction action, Action<IActivityTrackingAction> publishChannel){
+        ...
+        publishChannel.Invoke(action);
+    }
+    protected abstract void InitializeCore();
+    protected abstract void DisposeCore();
+    protected abstract IActivityTrackingDataCollectionCollaborationEntryPoint GetDataCollectionEntryPoint();
+    protected abstract object[] GetContextObjects();
+    protected abstract string GetContextInfo(object? context);
+}
+\end{CsCode}
+\caption{Basis Template für Aktionen}
+\label{prog:base_template_actions}
+\end{program}
+
+\subsubsection{Initialisierung}
+Die Methode Initialize stellt die Verbindung zum Trackingsystem über den IActivityTrackingDataCollectionCollaborationEntryPoint für die verschiedenen Kontextobjekte, wie beispielsweise Ansichten oder Präsentationsmodelle her. Diese Informationen erhält die Methode über die von der Anwendung implementierten, abstrakten Methoden.
+
+Der EntryPoint ist im Wesentlichen ein Interface, das vom Manager der Datensammlung implementiert wird. Der jeweilige Kontext sowie Metainformationen des konkreten Templates werden beim Registrieren verwendet, um zu entscheiden, ob ein Datenkanal bereitgestellt werden soll. Bei erfolgreicher Registrierung erhält die konkrete Implementierung die Möglichkeit, weitere Initialisierungsschritte für das Tracking durchzuführen.
+
+\subsubsection{Datenbereitstellung}
+Die Methode PublishAction übernimmt den Kanal zur Bereitstellung der Daten. Dieser Kanal wird beim Registrierungsprozess hinterlegt und beim Aufruf der PublishAction-Methode übergeben. Bevor die Daten tatsächlich weitergegeben werden, erfolgen Prüfungen, beispielsweise ob die Zusammenarbeit mit dem Trackingsystem weiterhin aktiv ist.
+
+\subsubsection{Abmeldung und Freigabe verwalteter Ressourcen}
+Das Template stellt außerdem die Methoden CancelDataCollectionCollaboration und Dispose bereit, die vom Trackingsystem verwendet werden, um bei Fehlern oder bei einer gezielten Deaktivierung des Trackings im laufenden Betrieb die genutzten Ressourcen sowie die Kommunikation mit dem Trackingsystem kontrolliert zu beenden. Wie auch bei der Initialisierung müssen in den abgeleiteten Klassen die entsprechenden Methoden implementiert werden, um dort spezifische Ressourcen freizugeben.
+
+\subsubsection{Weitere Merkmale des basis Templates}
+Im Programm \ref{prog:base_template_actions} werden einige Teile ausgeblendet, um den Fokus auf den Lebenszyklus zu belassen. Denoch ist zu erwähnen das an diesen Stellen bereits eine zentrale Fehlerbehandlung vorgenommen wird. Somit wird über den gesamten Lebenszyklus sichergestellt, dass das Programm aufgrund von Trackingaktivitäten nicht zum stillstand kommt.
 
 \subsection{Auftragsabarbeitung}
+Wie bereits erwähnt, wird bei der Registrierung entschieden, ob ein Provider aktiv werden kann. Dies stellt sicher, dass Ressourcen nur dann verwendet werden, wenn sie tatsächlich benötigt werden, also konkret dann, wenn ein entsprechender Auftrag vorliegt. Wie diese Entscheidung getroffen wird, ist im Programm \ref{prog:registration_code_snipped} dargestellt. Die Entscheidung selbst wird vom Manager der Datensammlung über diese Methode vorgenommen. Bei der Registrierung werden darüber hinaus weitere Aspekte berücksichtigt, beispielsweise der Schutz vor mehrfacher Registrierung und ähnliche Validierungen.
+
+Der zugrunde liegende Code zeigt, dass grundsätzlich jede Aktion einen Identifier mit Informationen über die Aktion bereitstellt. Dies hat den Vorteil, dass unterschiedliche Aktionen über einen gemeinsamen Identifier-Typ abgebildet werden können und die Aktionen dadurch flexibel erweiterbar sind. Auf Basis des Identifier-Typs und des jeweiligen Kontexts wird entschieden, ob ein Provider benötigt wird. Welche Aktionen ein Provider bereitstellen kann, gibt dieser über ein Attribut an, das mithilfe der Methode GetActionIdentifiersForActionProvider per Reflection  (Unterabschnitt \ref{subsec:reflection}) ausgelesen wird.
+
+Wie zu erkennen ist, handelt es sich hierbei zunächst nur um eine grobe Einschränkung. Die eigentliche Filterung (siehe Abschnitt \ref{sec:data_extraction_impl}) erfolgt erst im Anschluss. In diesem Schritt wird lediglich entschieden, dass Daten aus einer bestimmten Ansicht und Kategorie ermittelt werden sollen.
+
+\begin{program}[H]
+\begin{CsCode}
+public bool IsActionProviderRequired(IActivityTrackingActionProvider actionProvider, 
+                                     object context)
+{
+        var availableActions = GetActionIdentifiersForActionProvider(actionProvider);
+
+        return Entries.Any(e => 
+                    e.ActionIdentifier != null && 
+                    availableActions.Contains(e.ActionIdentifier.GetType()) &&
+                    (e.Context == null || e.Context.IsAssignableFrom(context.GetType())));
+}
+private IList<Type> GetActionIdentifiersForActionProvider(
+                        IActivityTrackingActionProvider actionProvider)
+{
+        return actionProvider
+            .GetType()
+            .GetCustomAttributes(typeof(ActionProviderForActionAttribute<>), true)
+            .Select(ap => ap.GetType().GetGenericArguments().First())
+            .ToList();
+}
+\end{CsCode}
+\caption{Tracking Provider Registierung Entscheidungsgrundlage}
+\label{prog:registration_code_snipped}
+\end{program}
+
 
 \section{Filterung und Extraktion}
 \label{sec:data_extraction_impl}
