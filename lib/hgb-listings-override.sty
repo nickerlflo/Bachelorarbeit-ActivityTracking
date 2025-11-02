@@ -3,6 +3,11 @@
 
 \RequirePackage{xcolor}
 \RequirePackage{listingsutf8}
+\RequirePackage{float}
+\RequirePackage{hyperref}
+\RequirePackage{caption}
+\RequirePackage{tocloft}
+\RequirePackage{etoolbox}
 
 \expandafter\let\csname CsCode\endcsname\relax
 \expandafter\let\csname endCsCode\endcsname\relax
@@ -12,7 +17,7 @@
     language=[Sharp]C,
     inputencoding=utf8,
     extendedchars=true,
-    basicstyle=\ttfamily\scriptsize,          % normal text size
+    basicstyle=\ttfamily\scriptsize,
     keywordstyle=\color{blue!80!black}\bfseries,
     commentstyle=\color{green!50!black}\itshape,
     stringstyle=\color{red!70!black},
@@ -29,7 +34,30 @@
     escapeinside={/+}{+/},
 }
 
-% Neue Umgebung
 \lstnewenvironment{CsCode}[1][]
 {\lstset{style=VSCodeCSharp, #1}}
 {}
+
+\renewcommand{\theprogram}{\thechapter.\arabic{program}}
+\renewcommand{\lstlistingname}{Programm}
+
+\let\oldprogram\program
+\let\endoldprogram\endprogram
+
+\renewenvironment{program}[1][H]{
+  \refstepcounter{program}
+  \oldprogram[#1]
+  \captionsetup{type=lstlisting}
+  \let\oldcaption\caption
+  \renewcommand{\caption}[1]{
+    \oldcaption{##1}
+  }
+}{
+  \endoldprogram
+}
+
+\makeatletter
+\pretocmd{\chapter}{
+  \addtocontents{lol}{\protect\addvspace{10pt}}
+}{}{}
+\makeatother

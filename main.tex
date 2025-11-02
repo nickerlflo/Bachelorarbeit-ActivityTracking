@@ -20,15 +20,12 @@
 %    APA Zitierstil: 'apa'
 %    Layout: 'oneside' (einseitig, default), 'twoside' (zweiseitig)
 %%%-----------------------------------------------------------------------------
-
-% Overrides
+% Package Overrides
 \RequirePackage{./lib/hgb-listings-override}
 \RequirePackage{./lib/hgb-bib-override}
-
 % Other Settings
 \graphicspath{{images/}}  % Verzeichnis mit Bildern und Grafiken
 \bibliography{bib/references} % Biblatex-Literaturdatei (hgbreferences.bib)
-
 
 %%%-----------------------------------------------------------------------------
 \begin{document}
@@ -92,8 +89,12 @@
 
 \MakeBibliography % Quellenverzeichnis
 
-% \listoffigures
-% \addcontentsline{toc}{chapter}{Abbildungsverzeichnis}
+\listoffigures
+\addcontentsline{toc}{chapter}{Abbildungsverzeichnis}
+
+\renewcommand{\lstlistlistingname}{Progammverzeichnis}
+\lstlistoflistings
+\addcontentsline{toc}{chapter}{Progammverzeichnis}
 
 %%%-----------------------------------------------------------------------------
 % Messbox zur Druckkontrolle
