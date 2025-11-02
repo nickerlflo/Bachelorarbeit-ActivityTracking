@@ -1,2 +1,59 @@
 \chapter{Diskussion und Ausblick}
 \label{cha:diskussion}
+In diesem Kapitel wird die Bachelorarbeit noch einmal aufgearbeitet und sowohl die positiven als auch die negativen Merkmale werden hervorgehoben.
+Anschließend wird dargestellt, wie diese Arbeit in Zukunft weiterverwendet werden kann und welche konkreten Weiterentwicklungsideen bestehen.
+
+\section{Zielerreichung}
+Das erarbeitete Konzept sowie die Implementierung können die zu Beginn der Arbeit formulierten Fragestellungen (siehe Unterabschnitt \ref{subsec:initial_questions}) beantworten und gehen in einigen Punkten sogar über den ursprünglichen Umfang hinaus.
+Damit kann festgestellt werden, dass die gesetzten Ziele insgesamt erreicht wurden.
+
+\section{Verbesserungspotential}
+Die Arbeit ist im Laufe des Projekts mit zunehmender Erfahrung gewachsen. Dadurch gibt es einige Stellen, an denen im Nachhinein andere Lösungsansätze zu besseren Ergebnissen hätten führen können.
+
+\subsection{Probleme mit Workflows}
+
+\subsubsection{Zusätzlicher Aktionstyp}
+Im Nachhinein wäre es sinnvoll gewesen, einen zusätzlichen Aktionstyp für das Wechseln zwischen Ansichten bereitzustellen. Aktuell besteht das Problem, dass es schwierig ist, den Beginn und das Ende eines Workflows eindeutig zu identifizieren.
+
+\subsubsection{Nachgelagerte Aggregation von Workflows}
+Workflows erzeugen eine enorme Menge an Daten, die insbesondere durch routete Events häufig nicht relevant sind. Ursprünglich war vorgesehen, diese Daten weiter zu filtern und bereits in aggregierter Form darzustellen. Es hat sich jedoch gezeigt, dass eine Aggregation schwierig ist, da sich die Workflows grundlegend unterscheiden. Daher wurde beschlossen, dass Darstellung und Verarbeitung nachgelagert erfolgen sollen und somit nur eine grundlegend Filterung statt findet.
+
+\subsection{Konfigurationsduplikate}
+Bei den konfigurierten Aufträgen wird versucht, Duplikate zu vermeiden.
+Es gibt jedoch Fälle, insbesondere bei Daten, die aus einem Präsentationsmodell oder einer Ansicht stammen, in denen sich solche Duplikate nicht vollständig verhindern lassen. Dies liegt an der Designentscheidung, dass Ansicht und Präsentationsmodell für bestimmte Konfigurationen die gleiche Bedeutung haben, später jedoch nicht eindeutig zugeordnet werden kann, welche Ansicht zu welchem Präsentationsmodell gehört.Um dieses Problem zu lösen, wären Analyzer erforderlich, die diese Zusammenhänge zur Compile-Zeit automatisch erkennen könnten.
+
+\subsection{Umfang des Projekts}
+Das System wurde in dieser Arbeit so gut wie möglich dargestellt.
+Allerdings ist der Umfang des tatsächlichen Programms deutlich größer, sodass im Rahmen dieser Arbeit nicht auf alle Punkte und Konzepte eingegangen werden konnte.
+Daher wirkt die Arbeit an einigen Stellen etwas zu abstrakt.
+
+\section{Erfahrungsgewinn}
+
+\subsection{Programmierung mit C\#}
+Da dieses Projekt sehr umfangreich war und dabei eine große Menge an C\#-Code (siehe Unterabschnitt \ref{subsec:csharp}) entwickelt wurde, konnten die Kenntnisse in dieser Programmiersprache deutlich vertieft werden.
+Zudem wurde intensiv mit der Reflection-API (siehe Unterabschnitt \ref{subsec:reflection}) gearbeitet, die zwar bereits vor Beginn der Arbeit bekannt war, jedoch kein tieferes Verständnis dafür vorhanden war.
+
+\subsubsection{Designmuster und Architektur}
+Das Projekt hat gezeigt, wie wichtig der Einsatz von Designmustern ist und welchen Einfluss diese auf die Verständlichkeit und Wartbarkeit von Software haben.
+
+Dabei konnte gelernt werden, wie entscheidend eine sorgfältige Planung und die Aufteilung des Softwaresystems in entkoppelte Einheiten ist.
+Dies ermöglicht eine effizientere und fokussiertere Arbeit an den einzelnen Teilbereichen.
+
+\section{Weitere Ausbaustufen des Frameworks}
+Wie zuvor beschrieben, bestehen noch einige Probleme, die behoben werden können.
+Darüber hinaus gibt es mehrere Ideen zur Weiterentwicklung des bestehenden Systems, die im Folgenden kurz beschrieben werden.
+
+\subsubsection{Konfiguration über einen Online-Service}
+Wie bereits in Unterabschnitt \ref{sec:configuration_concept} erwähnt, ist die Konfiguration derzeit ausschließlich über die Fluent API möglich.
+In Systemen wie Google Analytics (siehe Unterabschnitt \ref{subsec:google_analytics}) erfolgt die Konfiguration hingegen online über den Tag Manager.
+
+Da lange Releasezyklen die Flexibilität des Frameworks stark einschränken, wäre es eine sinnvolle Erweiterung, die Konfiguration über einen Online-Service bereitzustellen. Damit könnte die Konfiguration zusätzlich dynamisch angepasst und zentral verwaltet werden, ohne dass eine neue Programmversion ausgerollt werden muss.
+
+\subsubsection{Visualisierung der Verhaltensdaten}
+Die gesammelten Daten können zwar bereits übertragen und beispielsweise in einer Datenbank abgefragt werden. Zukünftig soll es jedoch möglich sein, Workflows als Graphen darzustellen oder die Daten mit Abbildungen von Ansichten zu verknüpfen, um eine bessere und schnellere, nicht-technische Übersicht über das Verhalten zu erhalten.
+
+
+\section{Künftige Verwendung des Frameworks}
+Für den praktischen Einsatz ist noch eine ausführliche Testphase erforderlich, in deren Rahmen Unit-Tests erstellt werden müssen. Zudem sollte das Tracking zunächst intern getestet werden, bevor es für alle Anwender*innen freigeschaltet wird.
+
+Wenn das Framework korrekt funktioniert, wird es voraussichtlich weitere Anfragen zur Erweiterung der Ermittlungsmöglichkeiten geben, die anschließend umgesetzt werden können. Wobei das Framework bereits einen umfangreichen Funktionsbereich abdeckt.
