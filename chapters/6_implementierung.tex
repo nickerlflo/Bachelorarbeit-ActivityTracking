@@ -484,6 +484,8 @@ Das gezeigte Programm implementiert einen Aktions-Provider, der die in einer Ans
 
 Der Provider übergibt dem Template außerdem die Schnittstelle zur Registrierung sowie die Objekte, die als gültiger Kontext für die Bereitstellung von Daten in Frage kommen. Für Shortcuts können in der Konfiguration daher sowohl das ViewModel als auch die View angegeben werden. Das Template übernimmt anschließend die weitere Verarbeitung und übermittelt die erfassten Informationen an das Tracking-Framework.
 
+Während der Verarbeitung werden Methoden wie GetKeyEventInfo und GetContextInfo aufgerufen, die es ermöglichen, zusätzliche Informationen aus dem Event sowie dem Context auszulesen und bereitzustellen. Der Detailgrad der gesammelten Daten hängt dabei insbesondere von der Granularität der verwendeten Provider ab.
+
 \begin{program}[H]
 \begin{CsCode}
 internal sealed class KeyboardActionProviderPX : IActivityTrackingProviderPresenterExtension{
@@ -495,6 +497,7 @@ internal sealed class KeyboardActionProviderPX : IActivityTrackingProviderPresen
         _keyboardActionProvider = new KeyboardActionProvider(_viewModel, _view, _dataCollectionCollaborationEntryPoint);
         _keyboardActionProvider.Initialize();
     }
+
     private class KeyboardActionProvider : KeyboardActionProviderTemplate{
         ...
         private void KeyEventHandlerAdapter(object sender, KeyEventArgs args) => 
