@@ -1,8 +1,122 @@
 \chapter{Anwendung und Auswertung}
 \label{cha:auswertung}
+In den Kapiteln Konzept (\ref{cha:konzept}) und Implementierung (\ref{cha:implementierung}) wurde beschrieben, wie das Framework funktioniert und integriert wurde. Dieses Kapitel erläutert nun, wie das Framework angewendet wird und welche Daten damit schlussendlich ermittelt werden können. Damit wird gezeigt, dass die beschriebenen Konzepte und Implementierungen funktionsfähig sind und nur Daten entsprechend der Konfiguration gesammelt werden. Abschließend wird diskutiert, welche Bedeutung diese Informationen haben und wie sie weiterverwendet werden können.
 
 \section{Ermittlung von Verhaltensdaten}
 \label{sec:testing}
+Um entsprechende Daten zu sammeln, muss zunächst eine Konfiguration erstellt werden, ähnlich wie bei Google Analytics (Unterabschnitt \ref{subsec:google_analytics}) oder OpenTelemetry (Unterabschnitt \ref{subsec:open_telemetry}). Diese Konfiguration wird mithilfe der entwickelten Fluent API \cite{Fowler2005FluentInterface} umgesetzt und ist im Programm \ref{prog:testdata_tracking_configuration} dargestellt.
+
+\begin{program}[H]
+\begin{CsCode}
+public void ProvideSettings(IActivityTrackingStartSettingAccessor
+                            <RZLViewModelBase, FrameworkElement> startSettingAccessor){
+    var personenViewSetting = startSettingAccessor.TrackView<PersonenUebersichtView>();
+
+    personenViewSetting.GetUsage().TrackShortcuts()
+        .SetShortCutInfo(Shortcut.Copy, "Person kopieren").ApplySetting();
+
+    personenViewSetting.GetMetric().SelectMetric(MetricType.LoadTime).ApplySetting();
+
+    personenViewSetting.GetUsage().TrackFunctionality(
+        nameof(PersonenUebersichtViewModel.NewPersonAsyncCommand), "Neue Person anlegen")
+        .ApplySetting();
+
+    startSettingAccessor
+        .TrackPresentationModel<PersonenUebersichtViewModel>()
+        .GetData().WhenLoaded().SelectProperty<int, int>(
+            propertySelector: vm => vm.PersonSearchVMX.Results.Count,
+            description: "Personen Anzahl").ApplySetting();
+}
+\end{CsCode}
+\caption{Tracking Konfiguration für Testdaten.}
+\label{prog:testdata_tracking_configuration}
+\end{program}
+
+Die folgende Konfiguration ermittelt die im weiteren Verlauf beschriebenen Daten aus einer Ansicht, in der die Stammdaten mehrerer Personen bearbeitet und hinzugefügt werden können.
+
+Zu Beginn wird eine Einstellung für das Tracking der Personen-Übersicht-Ansicht erstellt, die in weiterer Folge spezifiziert und anschließend mit ApplySetting zur Konfiguration hinzugefügt wird.
+
+Die erste Einstellung, die vollständig spezifiziert wurde, betrifft das Tracking von Shortcuts in der beschriebenen Ansicht. Dadurch werden alle in dieser Ansicht verwendeten Tastenkombinationen aufgezeichnet. Der Shortcut STRG + C wird in der Konfiguration zusätzlich mit einer erklärenden Information versehen.
+
+Für Entwickler*innen ist es häufig von Vorteil, die Performance bestimmter Ansichten im Auge zu behalten. Daher legt die Konfiguration fest, dass die Ladezeit dieser Ansicht ermittelt wird.
+
+Des Weiteren beschreibt die Konfiguration, dass aufgezeichnet werden soll, wie oft eine Person in dieser Ansicht erstellt wird.
+
+Da es möglicherweise ebenfalls von Interesse ist, wie viele Personen in dieser Ansicht angezeigt werden, wird diese Information nach dem Laden des Präsentationsmodells ausgelesen und ermittelt.
+
+Abschließend ist zu erwähnen, dass der Umfang der Möglichkeiten, wie bereits im Konzeptkapitel beschrieben, deutlich größer ist und es sich bei dieser Konfiguration lediglich um einen Ausschnitt handelt.
 
 \section{Auswertung und Schlussfolgerung}
 \label{sec:results}
+Die im vorherigen Abschnitt beschriebene Konfiguration wird beim Start des Programms in Aufträge umgewandelt, durch die die entsprechenden Daten ermittelt werden. Welche Daten nach dem Einsatz des Frameworks mit dieser Konfiguration tatsächlich gesammelt werden, wird in diesem Abschnitt erläutert. Zudem wird darauf eingegangen, welche Bedeutung diese Daten besitzen.
+
+Die Daten sind durch einen Selbsttest entstanden und sollen nur einen Überblick über die Funktionalität geben.
+
+\subsection{Daten aus Shortcut Konfiguration}
+Durch die Konfiguration zur Ermittlung von Shortcuts in der Personen-Übersicht-Ansicht ergeben sich beispielsweise die in Abbildung \ref{fig:tracking_result_shortcuts} dargestellten Daten.
+Diese zeigen, dass eine Person viermal in die Zwischenablage kopiert wurde. Die entsprechenden Informationen stammen aus der Konfiguration.
+
+Ein weiterer, in diesem Abschnitt nicht näher beschriebener Shortcut (Alles auswählen), wurde in der Ansicht ebenfalls ausgeführt.
+
+Die zusätzlichen Informationen, die im JSON mitgeliefert werden, sind für die Filterung relevant und geben Aufschluss darüber, woher die Daten stammen und welcher Kategorie sie zugeordnet werden können.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Shortcut_Kopieren}
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Shortcut_Alles_Auswählen}
+    \caption{Ergebnisse der Shortcut Konfiguration.}
+    \label{fig:tracking_result_shortcuts}
+\end{figure}
+
+\subsection{Daten aus Ladezeit Konfiguration}
+In Abbildung \ref{fig:tracking_loadtime_result} sind die aggregierten Ladezeiten für die Personen-Übersicht-Ansicht dargestellt. Daraus ist ersichtlich, dass die Ladezeit während dieses Programmlaufs zwischen 273 ms und 309 ms liegt. Daraus kann geschlossen werden, dass die Ladezeit für Anwender*innen des Programms in dieser Ansicht kein wahrnehmbares Problem darstellt.
+
+Bei echten Anwender*innen kann diese Zeit stark variieren, je nachdem, welche Infrastruktur (z.B. SQL-Server, Rechner oder Serverumgebung) im Einsatz ist. Dennoch sind die Abweichungen innerhalb eines einzelnen Programmlaufs ebenso von Interesse wie anwenderübergreifende Abweichungen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Load_Time}
+    \caption{Ergebnis der Ladezeit Konfiguration.}
+    \label{fig:tracking_loadtime_result}
+\end{figure}
+
+\subsection{Daten aus Konfiguration für Funktionsnutzung}
+Die in Abbildung \ref{fig:tracking_functionality_result} dargestellten Daten zeigen, dass während des Aufzeichnungszeitraums zweimal eine Person angelegt wurde.
+Die zugehörigen Metadaten werden erneut unter Infos angehängt, um bei der Auswertung zusätzliche Informationen zu den erfassten Daten anzeigen zu können.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Functionality_Usage}
+    \caption{Ergebnis der Konfiguration für Funktionsnutzung.}
+    \label{fig:tracking_functionality_result}
+\end{figure}
+
+\subsection{Daten aus Konfiguration für Datenermittlung}
+Da die Ansicht zwischen den erfassten Personen geschlossen und erneut geöffnet wurde und sich die Daten geändert haben, werden die in Abbildung \ref{fig:tracking_data_result} dargestellten Daten ermittelt.
+Diese zeigen, dass in der Ansicht zum Zeitpunkt des erneuten Öffnens 410 Personen angezeigt wurden.
+
+Die weiteren Informationen stellen erneut Metainformationen dar, die für das Filtern und Anzeigen der Daten verwendet werden können.
+
+Interessant an diesen Daten ist, dass im Fall des Context ein Titel vorhanden ist, der nun anstelle des Namens des Typs verwendet wird. Dies hängt jedoch davon ab, wie die Provider die Daten bereitstellen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Data_Fist_Opening}
+    \includegraphics[width=0.48\textwidth]{7_Tracking_Data_Second_Opening}
+    \caption{Ergebnisse der Konfiguration für Datenermittlung.}
+    \label{fig:tracking_data_result}
+\end{figure}
+
+\subsection{Schlussfolgerung}
+Wenn nun tausende Anwender*innen diese Daten an einen Server senden, könnte daraus wertvolle Information gewonnen werden, wie intensiv die Stammdaten von Personen verwendet werden und ob diese auch außerhalb des Programms, etwa durch Kopieren, genutzt werden.
+
+Des Weiteren kann ermittelt werden, ob es Probleme mit der Performance in der Ansicht gibt und ob dadurch Handlungsbedarf besteht.
+
+Die Analyse von Shortcuts kann im Zusammenhang mit der Usability genutzt werden, um zu beurteilen, ob eine bessere Beschreibung erforderlich ist oder ob bestimmte Shortcuts eventuell gar nicht benötigt werden.
+
+Dies sind alles wertvolle Informationen, die dazu beitragen, das Programm zu verbessern und potenzielle Probleme zu beheben.
+
+
+
+
+
