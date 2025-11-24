@@ -43,11 +43,11 @@ Der IL-Code stellt eine Zwischensprache zwischen Maschinencode und der Programmi
 Die Metadaten enthalten Informationen über Methodensignaturen, Typen und weitere Strukturdaten. Diese Metainformationen bilden zusammen mit Reflection (siehe Unterabschnitt \ref{subsec:reflection}) einen wichtigen Bestandteil der Laufzeitumgebung. Weiters enthält das erwähnte Manifest folgende Informationen:
 
 \begin{itemize}
-    \item Assembly Name
-    \item Assembly Version: Wesentlich, da Assemblies die kleinstmögliche Einheit der Versionierung darstellen. Dies ermöglicht beispielsweise die gleichzeitige Verwendung verschiedener Versionen einer Klassenbibliothek in einem Projekt.
-    \item Ressourcen Tabelle: Listet die eingebetteten Ressourcen auf.
-    \item Rerferenzen Liste: Listet die Abhängigkeiten zu anderen Assemblies auf.
-    \item Module: Gibt an, welche Module in einer Assembly enthalten sind. Im Standardfall, wie in Abbildung \ref{fig:assemblies_dotnet} dargestellt, existiert nur ein Modul.
+    \item \textbf{Assembly Name}
+    \item \textbf{Assembly Version:} Wesentlich, da Assemblies die kleinstmögliche Einheit der Versionierung darstellen. Dies ermöglicht beispielsweise die gleichzeitige Verwendung verschiedener Versionen einer Klassenbibliothek in einem Projekt.
+    \item \textbf{Ressourcen Tabelle:} Listet die eingebetteten Ressourcen auf.
+    \item \textbf{Rerferenzen Liste:} Listet die Abhängigkeiten zu anderen Assemblies auf.
+    \item \textbf{Module:} Gibt an, welche Module in einer Assembly enthalten sind. Im Standardfall, wie in Abbildung \ref{fig:assemblies_dotnet} dargestellt, existiert nur ein Modul.
 \end{itemize}
 
 Da Assemblies im PE-Format (Portable Executable) \cite{MicrosoftLearn_PEFormat} gespeichert werden, enthalten sie zusätzlich alle für dieses Format erforderlichen Informationen.
