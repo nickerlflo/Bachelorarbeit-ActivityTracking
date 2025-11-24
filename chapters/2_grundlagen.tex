@@ -117,7 +117,7 @@ Das Proxy-System funktioniert aufgrund des Abhörens des gesamten HTTP-Verkehrs 
 
 \subsection{Extern geladener JavaScript-Code}
 \label{subsec:external_js}
-Ähnlich wie die beschriebenen Proxy-Variante wird auch hier JavaScript eingesetzt. Im Gegensatz dazu erfolgt die Kommunikation jedoch nicht über einen Proxy, sondern über einen externen Server (siehe Abbildung \ref{fig:external_javascript}), wie dies beispielsweise bei Google Analytics der Fall ist. Das Skript-Tag wird dabei direkt in jede Seite eingebettet, und das Skript wird vom Client vom Tracking-Server heruntergeladen. Anschließend sendet der Client die erfassten Daten über einen HTTP-Request direkt an den Tracking-Server.  
+Ähnlich wie die beschriebenen Proxy-Variante wird auch hier JavaScript eingesetzt. Im Gegensatz dazu erfolgt die Kommunikation jedoch nicht über einen Proxy, sondern über einen externen Server (siehe Abbildung \ref{fig:external_javascript}), wie dies beispielsweise bei Google Analytics der Fall ist. Das Skript-Tag wird dabei direkt in jede Seite eingebettet, und das Skript wird vom Client vom Tracking-Server heruntergeladen. Anschließend sendet der Client die erfassten Daten über eine HTTP-Anfrage direkt an den Tracking-Server.  
 Die Informationen, die in der Proxy-Variante durch den Proxy ermittelt werden, können nun vom Browser selbst über asynchrone HTTP-Anfragen übertragen werden.
 
 \begin{figure}[H]
@@ -149,7 +149,7 @@ OpenTelemetry realisiert das automatische Tracking für .NET über die CLR Profi
 \end{figure}
 
 \subsubsection{Transparenz und Schwierigkeitsgrad}
-Der im Hintergrund laufende Code, der mit der Anwendung agiert, kann grundsätzlich bestehenden Code verändern und nicht nur neuen hinzufügen. Daher besteht die Gefahr, dass bestimmtes Verhalten nicht mehr nachvollziehbar ist, insbesondere für Entwickler*innen, die die ursprüngliche Anwendung entwickelt haben. Des Weiteren wird, wie in einem Artikel \cite{Mikunov2003} im MSDN erläutert, deutlich, dass es sich um ein komplexes Thema handelt. Die Implementierung mit C\# kann problematisch sein, da der .NET-Code erst vom JIT-Compiler übersetzt wird und auch Callbacks auslöst, die sorgfältig verarbeitet bzw. gefiltert werden müssen.
+Der im Hintergrund laufende Code, der mit der Anwendung agiert, kann grundsätzlich bestehenden Code verändern und nicht nur neuen hinzufügen. Daher besteht die Gefahr, dass bestimmtes Verhalten nicht mehr nachvollziehbar ist, insbesondere für Entwickler*innen, die die ursprüngliche Anwendung entwickelt haben. Des Weiteren wird, wie in einem Artikel \cite{Mikunov2003} im MSDN erläutert, deutlich, dass es sich um ein komplexes Thema handelt. Die Implementierung mit C\# (siehe Unterabschnitt \ref{subsec:csharp}) kann problematisch sein, da der .NET-Code erst vom JIT-Compiler übersetzt wird und auch Callbacks auslöst, die sorgfältig verarbeitet bzw. gefiltert werden müssen.
 
 \subsection{Aufgabendelegation}
 \label{subsec:task_delegation}
