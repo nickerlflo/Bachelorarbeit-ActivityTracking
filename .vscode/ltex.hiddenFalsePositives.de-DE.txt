@@ -1,0 +1,2 @@
+{"rule":"GERMAN_SPELLER_RULE","sentence":"^\\QUnternehmen wie die RZL Software GmbH benötigen hierfür Lösungen, die es ermöglichen, Nutzungsdaten in WPF- und Windows-Forms-Applikationen möglichst einfach und flexibel zu sammeln, ohne tiefgreifende Eingriffe in bestehende Systeme vornehmen zu müssen.\\E$"}
+{"rule":"GERMAN_SPELLER_RULE","sentence":"^\\QDas Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann.\\E$"}

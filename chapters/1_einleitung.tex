@@ -1,26 +1,26 @@
 \chapter{Einleitung}
 \label{cha:introduction}
-Dieses Kapitel gibt eine Übersicht über die Motivation und die Ziele dieser Arbeit. 
-Des Weiteren wird eine Übersicht über das Vorgehen zur Erreichung des Ziels gegeben.
+Dieses Kapitel gibt eine Übersicht über die Motivation und die Ziele dieser Bachelorarbeit. 
+Des Weiteren wird ein Überblick über das Vorgehen zur Erreichung dieser Ziele gegeben.
 
 \section{Hintergrund und Motivation}
 
 \subsection{Umstellung von Softwaresystemen}
-Viele Unternehmen stehen vor der Entscheidung, größere Softwaresysteme auf neue Technologien umzustellen. Dies erfordert jedoch häufig einen enormen Entwicklungsaufwand und somit oft mehr Aufwand, als die verfügbaren Ressourcen zulassen, da neben der Umstellung meist noch neue Produkte entwickelt werden. Neben KI, speziellen Tools und anderen technischen Möglichkeiten, Code wiederzuverwenden oder auf eine andere Technologie zu migrieren, ist eine vorerst einfache Möglichkeit Features wegzulassen.
+Viele Unternehmen stehen vor der Entscheidung, größere Softwaresysteme auf neue Technologien umzustellen. Dies erfordert jedoch häufig einen enormen Entwicklungsaufwand und somit oft mehr Aufwand, als die verfügbaren Ressourcen zulassen, da neben der Umstellung meist noch neue Produkte entwickelt werden und alte Software gewartet wird. Neben KI, speziellen Tools und anderen technischen Möglichkeiten, Code wiederzuverwenden oder auf eine andere Technologie zu migrieren, ist eine vorerst einfache Möglichkeit, Programmfunktionalität wegzulassen.
 
-\subsection{Entscheidung für Features}
-Die Basis für faktenbasierte Entscheidungen bilden hierbei Verhaltensdaten aus der bestehenden Anwendung. Derartige Daten müssen daher vor solchen Umstellungen mit Tracking-Technologien ermittelt und ausgewertet werden. Im Web gibt es bereits verschiedene Möglichkeiten, gezielt solche Daten zu sammeln und auf einer Weboberfläche darzustellen. Vergleichbare Möglichkeiten existieren im Bereich von Desktopanwendungen, die auf den UI-Frameworks WPF und Windows Forms basieren, nicht. Die Auswertung mit den bestehenden Systemen ist zwar oft unabhängig von der Technologie möglich, jedoch fehlt das Gegenstück zur Sammlung der Daten aus Desktopanwendungen.
+\subsection{Entscheidung für Programmfunktionalität}
+Die Basis für faktenbasierte Entscheidungen bilden hierbei Verhaltensdaten aus der bestehenden Anwendung. Derartige Daten müssen daher vor solchen Umstellungen mit Tracking-Technologien ermittelt und ausgewertet werden. Im Web-Umfeld gibt es bereits verschiedene Möglichkeiten (siehe Abschnitt \ref{sec:similar_applications}), gezielt solche Daten zu sammeln und auf einer Weboberfläche darzustellen. Vergleichbare Möglichkeiten existieren im Bereich von Desktopanwendungen, die auf den UI-Frameworks WPF und Windows Forms basieren, nicht. Die Auswertung mit den bestehenden Systemen ist zwar oft unabhängig von der Technologie möglich, jedoch fehlt das Gegenstück zur Sammlung der Daten aus Desktopanwendungen.
 
 \subsection{Technologieänderung Richtung Web}
-Aktuelle Trends zeigen, dass sich die Entwicklung Richtung Web verlagert und Desktopanwendungen dadurch an Relevanz verlieren. Daher sind gerade für nicht-webbasierte Technologien Daten über die Nutzung der Software wichtig. Unternehmen wie RZL Software benötigen daher Lösungen, die es ihnen ermöglichen, Nutzungsdaten in WPF- und Windows-Forms-Applikationen zu sammeln und das auf eine möglichst einfache und flexible Art und Weise.
+Aktuelle Trends zeigen, dass sich die Softwareentwicklung zunehmend in Richtung Web verlagert, wodurch klassische Desktopanwendungen an Relevanz verlieren. Besonders deutlich wird dies am starken Wachstum im Bereich Software as a Service (SaaS) und Cloud-Lösungen \cite{konsgen2018key}, die in den letzten Jahren erheblich an Bedeutung gewonnen haben. Vor diesem Hintergrund ist es gerade für nicht webbasierte Technologien wichtig, die Nutzung der Software systematisch zu erfassen. Unternehmen wie die RZL Software GmbH benötigen hierfür Lösungen, die es ermöglichen, Nutzungsdaten in WPF- und Windows-Forms-Applikationen möglichst einfach und flexibel zu sammeln, ohne tiefgreifende Eingriffe in bestehende Systeme vornehmen zu müssen.
 
 \section{Ziele der Arbeit}
 
 \subsection{Datenermittlung}
-Das Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann. Die Anforderungen an dieses System sind die Ermittlung, Filterung und Extraktion von Nutzungsdaten. Darauf aufbauend müssen die ermittelten Daten pseudonymisiert und strukturiert an ein bestehendes System übermittelt werden können. Daher liegt der Fokus der Arbeit auf der Datenermittlung und nicht der Auswertung oder Darstellung der Daten.
+Das Ziel der Arbeit ist die Entwicklung eines Verhaltens-Tracking-Frameworks, das für Windows-Forms- und WPF-Anwendungen eingesetzt werden kann. Die Anforderungen an dieses System sind die Ermittlung, Filterung und Extraktion von Nutzungsdaten. Darauf aufbauend müssen die ermittelten Daten strukturiert und aggregiert an ein bestehendes System übermittelt werden können. Daher liegt der Fokus der Arbeit auf der Datenermittlung und nicht der Auswertung oder Darstellung der Daten.
 
-\subsection{Konfigurierbar}
-Aus Entwicklungssicht muss eine gezielte Steuerung und Auswahl der zu sendenden Daten einfach und ohne Anpassung des bestehenden Codes möglich sein. Somit entsteht die Voraussetzung einer einmalige Integration in das bestehende System, wobei sich das Framework flexibel durch Konfiguration an das Basissystem anpassen muss.
+\subsection{Konfigurierbarkeit}
+Aus Entwicklungssicht muss eine gezielte Steuerung und Auswahl der zu sendenden Daten einfach und ohne Anpassung des bestehenden Codes möglich sein. Somit entsteht die Voraussetzung einer einmaligen Integration in das bestehende System, wobei sich das Framework flexibel durch Konfiguration an das Basissystem anpassen muss.
 
 \subsection{Fragen zur Beantwortung}
 \label{subsec:initial_questions}
@@ -38,23 +38,23 @@ Von besonderer Relevanz ist, dass die vom System erfassten Informationen die Aus
 \end{itemize}
 
 \subsection{Anwendung des Systems}
-Um zu zeigen, dass dieses System die entsprechenden Anforderungen erfüllt, soll diese Arbeit diese Fragen aus Abschnitt \ref{subsec:initial_questions} auf Basis einer Ansicht aus einem bestehenden System beantworten. Somit soll an einem Praxisbeispiel die Verwendung des Frameworks verdeutlicht werden.
+Um zu zeigen, dass dieses System die entsprechenden Anforderungen erfüllt, soll diese Arbeit diese Fragen aus Abschnitt \ref{subsec:initial_questions} auf Basis einer Ansicht aus einem bestehenden System exemplarisch beantworten. Somit soll an einem Beispiel die Verwendung des Frameworks verdeutlicht werden.
 
 \section{Vorgehensweise}
-Um ein funktionierendes Framework zu entwickeln, welches die Anforderungen erfüllt, wird nach einem Schema vorgegangen. Dieses Schema ist in diesem Abschnitt beschrieben und hilft dabei, die Anforderungen zu erfüllen.
+Um ein funktionierendes Framework zu entwickeln, welches die Anforderungen erfüllt, wird nach einem Schema vorgegangen. Dieses Schema ist in diesem Abschnitt beschrieben.
 
 \subsection{Analyse}
 \label{subsec:research}
-Im ersten Schritt ist es wesentlich, bestehende Konzepte zu erfassen und auf die verwendete Technologie zu übertragen. Diese Systeme werden größtenteils im Webbereich eingesetzt und sind in Abschnitt \ref{sec:solutions_tracking} zusammengefasst. Aus diesen Grundlagen geht auch hervor, wie wichtig es ist, Cross-Cutting-Concerns \cite{crosscutting} zu berücksichtigen und den bestehenden Code dabei sauber zu halten.
+Im ersten Schritt ist es wesentlich, bestehende Konzepte aus Systemen zu erfassen und auf die verwendete Technologie zu übertragen. Diese Systeme werden größtenteils im Webbereich eingesetzt und sind in Abschnitt \ref{sec:solutions_tracking} zusammengefasst. Aus diesen Grundlagen geht auch hervor, wie wichtig es ist, Cross-Cutting-Concerns \cite{crosscutting} zu berücksichtigen und den bestehenden Code dabei qualitativ hochwertig zu halten.
 
-\subsection{Design}
+\subsection{Konzept}
 \label{subsec:design_info}
-Im nächsten Schritt ist es notwendig, die in Abschnitt \ref{subsec:research} gewonnenen Erkenntnisse in ein möglichst modulares System zu überführen. Dabei wird mit der Konfiguration begonnen, da sie klar beschreibt, welche Aufgaben die anderen Komponenten im System erfüllen müssen. Die Komponenten für die Datenerfassung, das Extrahieren und die Zusammenstellung der Daten folgen anschließend.
+Im nächsten Schritt ist es notwendig, die im Abschnitt \ref{subsec:research} gewonnenen Erkenntnisse in ein möglichst modulares System zu überführen. Dabei wird mit der Konfiguration der Datensammlung begonnen, da sie klar beschreibt, welche Aufgaben die anderen Komponenten im System erfüllen müssen. Die Komponenten für die Datenerfassung, das Extrahieren, die Zusammenstellung der Daten sowie die Konfiguration des Frameworks im Kontext der Anwendung folgen anschließend.
 
 \subsection{Implementierung}
-Das aus Abschnitt \ref{subsec:design_info} erhaltene Design kann im Anschluss umgesetzt werden. Dabei ergibt sich die zum Testen und Entwickeln sinnvolle Reihenfolge (Konfiguration, Datensammlung und Datenextraktion). Nach dem Verbinden dieser Komponenten zeigt sich, wie diese unabhängigen Teile zusammenspielen. In der Implementierung der Datensammlung erfolgt bereits die Integration in die bestehenden Anwendungen.
+Das aus Abschnitt \ref{subsec:design_info} erhaltene Konzept kann im Anschluss umgesetzt werden. Dabei ergibt sich die zum Testen und Entwickeln logische Reihenfolge: Konfiguration, Datensammlung, Datenextraktion und Integration in Anwendungen. Bei der Umsetzung wird auf die wichtigsten Bestandteile des Frameworks und dessen Implementierung eingegangen, wobei an Ausschnitten aus dem Framework die Umsetzung erläutert wird.
 
 \subsection{Konfiguration und Testen}
-Um die Funktionsfähigkeit des Systems zu demonstrieren, muss eine praxistaugliche Konfiguration bereitgestellt werden. Die daraus resultierenden Daten werden anschließend verwendet, um die in Abschnitt \ref{subsec:initial_questions} abgeleiteten Fragen zu beantworten.
+Um die Funktionsfähigkeit des Systems zu demonstrieren, wird eine Konfiguration bereitgestellt. Die daraus resultierenden Daten werden anschließend verwendet, um die in Abschnitt \ref{subsec:initial_questions} abgeleiteten Fragen exemplarisch zu beantworten.
 
 
