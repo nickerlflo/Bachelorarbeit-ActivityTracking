@@ -1,19 +1,19 @@
 \chapter{Bestehendes System}
 \label{cha:basis}
-Da die Arbeit bereits in ein bestehendes System integriert wird, gibt es Möglichkeiten, bereits vorhandenen Code wiederzuverwenden. Um die Implementierung (Kapitel \ref{cha:implementierung}) nachvollziehen zu können, werden in diesem Kapitel einzelne bestehende Konzepte vorgestellt, die dabei helfen, das Framework zu integrieren und weiterzuentwickeln.
+Da die Bachelorarbeit bereits in ein bestehendes System integriert wird, gibt es Möglichkeiten, bereits vorhandenen Code wiederzuverwenden. Um die Implementierung (Kapitel \ref{cha:implementierung}) nachvollziehen zu können, werden in diesem Kapitel einzelne bestehende Konzepte vorgestellt, die dabei helfen, das Framework später zu integrieren.
 
 \section{MVVM spezifische Erweiterungen}
 \label{sec:mvvm_extensions}
-Grundsätzlich basiert das WPF-System (siehe Unterabschnitt \ref{subsec:WPF}) auf dem in Unterabschnitt \ref{subsec:mvvm} beschriebenen MVVM-Muster. Würde jedoch die gesamte Logik direkt in die Vererbungshierarchie der ViewModels integriert werden, würde dies die Flexibilität erheblich einschränken und die Komplexität deutlich erhöhen. Daher wurde das MVVM-Muster an die spezifischen Anforderungen der Anwendung angepasst.
+Grundsätzlich basiert das WPF-System (siehe Unterabschnitt \ref{subsec:WPF}) auf dem in Unterabschnitt \ref{subsec:mvvm} beschriebenen MVVM-Muster. Würde die gesamte Logik jedoch direkt in die Vererbungshierarchie der ViewModels integriert, würde dies die Flexibilität erheblich einschränken und die Komplexität deutlich erhöhen. Darüber hinaus können Datenbindungen komplexere Szenarien nicht immer korrekt abbilden. Daher wurde das MVVM-Muster an die spezifischen Anforderungen der bestehenden Anwendung angepasst.
 
 \subsection{Presenter}
-Bindings ermöglichen zwar einen relativ einfachen Datenaustausch zwischen View und ViewModel, jedoch treten häufig Situationen auf, in denen Daten das Verhalten der View beeinflussen oder Aktionen im ViewModel ausgelöst werden müssen, die sich über einfache Commands\footnote{Commands \cite{wpf_commanding_overview} sind ein Konzept, bei dem ein Objekt erstellt wird, das eine Aufgabe ausführt, wenn es getriggert wird. Dieses Objekt kann über ein Binding ausgetauscht werden.} nicht mehr abbilden lassen. 
+Datenbindungen ermöglichen zwar einen relativ einfachen Datenaustausch zwischen View und ViewModel, doch treten häufig Situationen auf, in denen Daten das Verhalten der Ansicht beeinflussen oder Aktionen im ViewModel ausgelöst werden müssen, die sich über einfache Kommandos\footnote{Kommandos \cite{wpf_commanding_overview} sind ein Konzept, bei dem ein Objekt erstellt wird, das eine Aufgabe ausführt, sobald es getriggert wird. Dieses Objekt kann über Datenbindung ausgetauscht werden.} nicht mehr abbilden lassen.
 
 In der betreffenden WPF-Anwendung kommen daher Presenter zum Einsatz, die die Kommunikation zwischen ViewModel und View sowohl auf Basis von Daten als auch über Events ermöglichen. Dem Presenter sind sowohl die View als auch das ViewModel bekannt, jedoch können weder View noch ViewModel auf den Presenter zugreifen.
 
-Der Erzeugungsprozess des MVVM-Konstrukts mit Presenter sowie die beschriebenen Zusammenhänge sind in Abbildung \ref{fig:mvvm_with_presenter} dargestellt. Die dort abgebildete ViewModel Region ist ein Control, das die Darstellung eines ViewModels mithilfe der entsprechenden View vornimmt. Die ViewModel Region verwendet eine Factory, um die entsprechenden Presenter zu erzeugen. Die dazugehörigen Informationen, welche View und welcher Presenter für ein bestimmtes ViewModel erzeugt werden sollen, entnimmt die Factory der MVVM-Config. 
+Der Erzeugungsprozess des MVVM-Konstrukts mit Presenter sowie die beschriebenen Zusammenhänge sind in Abbildung \ref{fig:mvvm_with_presenter} dargestellt. Die dort abgebildete ViewModel Region ist ein Control, das die Darstellung eines ViewModels mithilfe der entsprechenden View vornimmt. Die ViewModel Region verwendet eine Fabrik (siehe Factory-Muster \cite{gamma1995design}), um die entsprechenden Presenter zu erzeugen. Die dazugehörigen Informationen, welche View und welcher Presenter für ein bestimmtes ViewModel erzeugt werden sollen, entnimmt die Fabrik der MVVM-Config\footnote{Die MVVM-Config ist eine Konfiguration, die die Zuordnung von ViewModel, View, Presenter und deren Erweiterungen festlegt.}. 
 
-Die grünen Pfeile in der Abbildung beschreiben den Datenaustausch über Bindings sowie die Events und Daten, die über den Presenter weitergeleitet werden können, wenn beispielsweise keine Commands oder kein verwendbares Binding zur Verfügung stehen.
+Die grünen Pfeile in der Abbildung \ref{fig:mvvm_with_presenter} veranschaulichen den Datenaustausch über Datenbindungen sowie die Events und Daten, die über den Presenter weitergeleitet werden können, wenn beispielsweise kein Kommando oder keine verwendbare Datenbindung zur Verfügung steht.
 
 \begin{figure}[H]
     \centering
@@ -22,25 +22,25 @@ Die grünen Pfeile in der Abbildung beschreiben den Datenaustausch über Binding
     \label{fig:mvvm_with_presenter}
 \end{figure}
 
-\subsection{ViewModel Extensions}
+\subsection{ViewModel Erweiterungen}
 \label{subsec:viewmodel_extensions}
-ViewModel Extensions erweitern ein ViewModel um zusätzliche Funktionalitäten, wie z.B. automatisches Speichern oder Datenvalidierung. Diese Erweiterungen werden für jedes ViewModel in einer Liste gespeichert und gemeinsam mit dem ViewModel initialisiert. Eine ViewModel Extension erhält Zugriff auf das ViewModel, das sie erweitert und kann über Properties des Haupt-ViewModels auch für das Binding zur View verwendet werden. ViewModel Extensions müssen dem ViewModel während des Konstruktionsprozesses hinzugefügt werden.
+ViewModel-Erweiterungen erweitern ein ViewModel um zusätzliche Funktionalitäten, wie z.B. automatisches Speichern oder Datenvalidierung. Diese Erweiterungen werden für jedes ViewModel in einer Liste gespeichert und gemeinsam mit dem ViewModel initialisiert. Eine ViewModel-Erweiterung erhält Zugriff auf das ViewModel, das sie erweitert, und kann über dessen Eigenschaften auch für die Datenbindung an die Ansicht verwendet werden. ViewModel-Erweiterungen müssen dem ViewModel bereits während des Konstruktionsprozesses hinzugefügt werden.
 
-\subsection{Presenter und Presenter Extensions}
+\subsection{Presenter Erweiterungen}
 \label{subsec:presenter_extensions}
-Presenter Extensions sind analog zu den zuvor beschriebenen ViewModel Extensions, erweitern jedoch den Presenter. Sie werden über eine Factory in der MVVM-Config\footnote{Die MVVM-Config ist eine Konfiguration, die die Zuordnung von ViewModel, View, Presenter und deren Extensions festlegt.} definiert. Dort können Presenter Extensions mit dem jeweiligen Presenter, der View, dem ViewModel und den zugehörigen ViewModel Extensions erzeugt werden. Presenter Extensions besitzen keine spezielle Struktur und müssen beim Erzeugen initialisiert werden. Wie auch ViewModels werden sie im entsprechenden Presenter gehalten.
+Presenter-Erweiterungen sind analog zu den zuvor beschriebenen ViewModel-Erweiterungen, erweitern jedoch den Presenter. Sie werden über eine Fabrik in der MVVM-Config definiert. Dort können Presenter-Erweiterungen gemeinsam mit dem jeweiligen Presenter, der View, dem ViewModel und der zugehörigen ViewModel-Erweiterung erzeugt werden. Presenter-Erweiterungen besitzen keine festgelegte Struktur und müssen bei ihrer Erstellung initialisiert werden. Wie die ViewModels selbst werden sie im entsprechenden Presenter gehalten.
 
 \section{Windows Forms spezifische Erweiterungen}
 \label{sec:mvp_extensions}
 Wie auch in WPF (siehe Unterabschnitt \ref{subsec:WPF}) gibt es für Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) einige Erweiterungen, welche die Entwicklung erleichtern und für die Integration des Frameworks in die Anwendung notwendig sind.
 
-\subsection{Embedded Presenter}
+\subsection{Eingebettete Presenter}
 \label{subsec:embedded_presenter}
-In der mit Windows Forms umgesetzten Anwendung wird das MVP-Muster strikt angewendet. Dennoch gibt es Aufgaben, die sich wiederholen und sich gut aus dem Hauptpresenter herauslösen lassen, um eine höhere Kohäsion zu erreichen. Für solche Aufgaben werden Embedded Presenter eingesetzt. Diese Presenter werden in einem Initialisierungsschritt im Hauptpresenter erzeugt und erhalten Zugriff auf diesen. Dadurch können typische Aufgaben wie Validierung, Speichern oder ähnliches ausgelagert sowie flexibel ausgetauscht oder ergänzt werden. Nach ihrer Erzeugung werden Embedded Presenter unmittelbar initialisiert.
+In der mit Windows Forms umgesetzten Anwendung wird das MVP-Muster (siehe Unterabschnitt \ref{subsec:mvp}) angewendet. Dennoch gibt es Aufgaben, die sich wiederholen und sich gut aus dem Hauptpresenter herauslösen lassen, um eine höhere Kohäsion zu erreichen. Für solche Aufgaben werden eingebettete Presenter eingesetzt. Diese werden in einem Initialisierungsschritt im Hauptpresenter erzeugt und erhalten Zugriff auf diesen. Dadurch können typische Aufgaben wie Validierung, Speichern oder Ähnliches ausgelagert sowie flexibel ausgetauscht oder ergänzt werden. Nach ihrer Erzeugung werden eingebettete Presenter unmittelbar initialisiert. Wie auch bei ViewModel- und Presenter-Erweiterungen wird nach dem Prinzip Delegation vor Vererbung gehandelt \cite{eilebrecht2010patterns}.
 
 \subsection{UI Accessor}
-
-Um auf Events von Controls zugreifen zu können, wird der UI Accessor verwendet. Dieser abstrahiert verschiedene Events mit gleicher Bedeutung zu einem gemeinsamen, standardisierten Event und ermöglicht dadurch die Registrierung von Handlern auf diese vereinheitlichten Ereignisse. Dies vereinfacht die Handhabung von Benutzerinteraktionen, da bei der Registrierung kein Wissen über das konkrete Event oder den zugehörigen Event-Handler erforderlich ist. Die abstrahierten Events werden über den CommandMapper als sogenannte Commands bereitgestellt und können über den Presenter registriert oder deregistriert werden.
+\label{subsec:ui_accessor_component}
+Um auf Events von Controls zugreifen zu können, wird der UI Accessor verwendet. Dieser abstrahiert verschiedene Events mit gleicher Bedeutung zu einem gemeinsamen, standardisierten Event und ermöglicht dadurch die Registrierung von Handlern auf diese vereinheitlichten Ereignisse. Dies vereinfacht die Handhabung von Benutzerinteraktionen, da bei der Registrierung kein Wissen über das konkrete Event oder den zugehörigen Event-Handler erforderlich ist. Die abstrahierten Events werden über den Kommando-Mapper als sogenannte Kommandos bereitgestellt und können über den Presenter registriert oder deregistriert werden.
 
 Da es in Windows Forms viele unterschiedliche Events mit gleicher Bedeutung gibt, spielt diese Abstraktion eine wichtige Rolle. Darüber hinaus können auch benutzerdefinierte UserControls mit eigenen Events zentral berücksichtigt werden.
 
@@ -50,7 +50,7 @@ Sowohl in Windows Forms (siehe Unterabschnitt \ref{subsec:Winforms}) als auch in
 
 Gerade für die Registrierung von Events ist das Auffinden bestimmter Controls in diesem Baum entscheidend. Daher gibt es sowohl für WPF als auch für Windows Forms einen Visual Tree Helper, der Elemente rekursiv im Baum findet.
 
-Eine klare Unterscheidung zwischen dem logischen und dem visuellen Baum ist in WPF \cite{microsoft_trees_in_wpf} wesentlich und wird in Abbildung \ref{fig:logical_visual_tree} veranschaulicht. Während der visuelle Baum ausschließlich die tatsächlich sichtbaren Elemente einer Benutzeroberfläche umfasst, beschreibt der logische Baum die hierarchische Struktur der Ansicht, einschließlich jener Objekte, die beispielsweise als Container, Templates oder Datenprovider für sichtbare Elemente dienen.
+Eine klare Unterscheidung zwischen dem logischen und dem visuellen Baum ist in WPF \cite{microsoft_trees_in_wpf} wesentlich und wird in Abbildung \ref{fig:logical_visual_tree} veranschaulicht. Während der visuelle Baum ausschließlich die tatsächlich sichtbaren Elemente einer Benutzeroberfläche umfasst, beschreibt der logische Baum die hierarchische Struktur der Ansicht, einschließlich jener Objekte, die beispielsweise als Container, Vorlage oder Datenprovider für sichtbare Elemente dienen.
 
 \begin{figure}[H]
     \centering
@@ -65,4 +65,4 @@ Für die Konfiguration in Abschnitt \ref{sec:configuration_concept} müssen best
 
 Da dies insbesondere bei größeren Anwendungen zu Performanceproblemen führen kann, werden alle relevanten Assemblies bereits während des Build-Prozesses auf die Implementierung entsprechender Interfaces überprüft. Die dabei gefundenen Assemblies werden anschließend registriert und in einem Zwischenspeicher abgelegt.
 
-Bei späteren Suchvorgängen nach Klassen, die ein bestimmtes Interface implementieren, müssen dadurch nicht mehr alle Assemblies durchsucht werden, sondern nur diejenigen, die tatsächlich relevant sind. Dies reduziert den Suchaufwand und verbessert die Ladezeit der Anwendung.
+Bei späteren Suchvorgängen nach Klassen, die ein bestimmtes Interface implementieren, müssen dadurch nicht mehr alle Assemblies durchsucht werden, sondern nur diejenigen, die tatsächlich relevant sind. Dies reduziert den Suchaufwand und verbessert die Performance der Anwendung.
